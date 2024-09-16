@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 
 import Image from "next/image";
-import LoginForm from "./loginForm";
+import LoginForm from "./LoginForm";
 
 export const description =
   "A simple login form with email and password. The submit button says 'Sign in'.";
