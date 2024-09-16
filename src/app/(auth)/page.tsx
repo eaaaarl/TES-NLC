@@ -9,17 +9,13 @@ import {
 import Image from "next/image";
 import LoginForm from "./LoginForm";
 
-export const description =
-  "A simple login form with email and password. The submit button says 'Sign in'.";
-
-export default function loginPage() {
+export default function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <div className="relative">
-            <div className="absolute inset-0 bg-white rounded-full shadow-md"></div>{" "}
-            {/* Light background for better visibility */}
+            <div className="absolute inset-0 bg-white rounded-full shadow-md"></div>
             <Image
               src="/assets/nemsu-logo.png"
               alt="Northern Eastern Mindanao State University"

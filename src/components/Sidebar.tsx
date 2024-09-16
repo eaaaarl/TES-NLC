@@ -3,16 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
-import {
-  Bell,
-  Home,
-  LineChart,
-  Package,
-  Package2,
-  ShoppingCart,
-  Users,
-} from "lucide-react";
-import { Badge } from "./ui/badge";
+import { Bell, Home, LineChart, Package, Package2, Users } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname(); // Get current route

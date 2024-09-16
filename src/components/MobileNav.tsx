@@ -1,15 +1,13 @@
 import React from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SheetContent } from "@/components/ui/sheet";
 import Link from "next/link";
 import {
   Home,
   LineChart,
   Package,
   Package2,
-  ShoppingCart,
   Users,
 } from "lucide-react";
-import { Badge } from "./ui/badge";
 
 export default function MobileNav() {
   return (

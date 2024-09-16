@@ -84,12 +84,15 @@ export function UserTable() {
   }, [search, refetch]);
 
   useEffect(() => {
-    if (data && data.students.length === 0 && currentPage > 1) {
+    if (data?.students.length === 0 && currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
   }, [data, currentPage]);
 
-  const hasMore = data?.currentPage < data?.totalPages;
+  const hasMore =
+    data?.currentPage !== undefined &&
+    data?.totalPages !== undefined &&
+    data.currentPage < data.totalPages;
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this student?")) {
@@ -147,12 +150,12 @@ export function UserTable() {
             <TableRow>
               <TableCell colSpan={4}>Error: {error.message}</TableCell>
             </TableRow>
-          ) : data.students.length === 0 ? (
+          ) : data?.students.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4}>No data available</TableCell>
             </TableRow>
           ) : (
-            data.students.map((student) => (
+            data?.students.map((student) => (
               <TableRow key={student.id}>
                 <TableCell>{student.studentID}</TableCell>
                 <TableCell>{student.fullname}</TableCell>
@@ -170,7 +173,9 @@ export function UserTable() {
                       <DropdownMenuItem onClick={() => handleEdit(student.id)}>
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(student.id)}>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(student.id)}
+                      >
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -188,7 +193,7 @@ export function UserTable() {
         >
           Previous
         </Button>
-        <span>Page {data?.currentPage}</span>
+        <span>Page {data?.currentPage ?? 1}</span>
         <Button
           onClick={() => setCurrentPage((prev) => (hasMore ? prev + 1 : prev))}
           disabled={!hasMore}

@@ -9,7 +9,7 @@ export function useCreateStudentSchema() {
     const mutation = useMutation({
         mutationFn: createStudent,
         onSuccess: () => {
-            queryClient.invalidateQueries(["students"]);
+            queryClient.invalidateQueries({ queryKey: ['students'] });
             toast({
                 description: "Student created successfully",
             });
