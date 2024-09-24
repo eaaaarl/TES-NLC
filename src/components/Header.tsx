@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,14 +15,33 @@ import { Button } from "./ui/button";
 import { CircleUser, Menu, Search } from "lucide-react";
 import MobileNav from "./MobileNav";
 import LogoutButton from "./LogoutButton";
-import { validateRequest } from "@/auth";
 import { ModeToggle } from "./ToggleMode";
 
-export default async function Header() {
-  const { user } = await validateRequest();
+interface AdminInfo {
+  fullname: string;
+  email: string;
+}
+
+export default function Header() {
+  const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
+  useEffect(() => {
+    const getAdminInfo = async () => {
+      try {
+        const response = await fetch(`/api/admin/auth/get`);
+        if (response.ok) {
+          const data = await response.json();
+          setAdminInfo(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch admin info:", error);
+      }
+    };
+
+    getAdminInfo();
+  }, []);
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-     
+      {/* Mobile menu button */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 md:hidden">
@@ -30,6 +51,8 @@ export default async function Header() {
         </SheetTrigger>
         <MobileNav />
       </Sheet>
+
+      {/* Search bar */}
       <div className="w-full flex-1">
         <form>
           <div className="relative">
@@ -42,7 +65,11 @@ export default async function Header() {
           </div>
         </form>
       </div>
+
+      {/* Dark/Light Mode Toggle */}
       <ModeToggle />
+
+      {/* User dropdown menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
@@ -51,7 +78,10 @@ export default async function Header() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
+          {/* Display user email or placeholder */}
+          <DropdownMenuLabel>
+            {adminInfo?.fullname || "Loading..."}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Settings</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>

@@ -1,51 +1,153 @@
+"use client";
+
 import React from "react";
 import { SheetContent } from "@/components/ui/sheet";
 import Link from "next/link";
 import {
+  Album,
+  BookText,
+  ChartBarBig,
+  ContactRound,
   Home,
+  LayoutPanelTop,
   LineChart,
   Package,
-  Package2,
-  Users,
+  User,
+  UserCog,
 } from "lucide-react";
-
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 export default function MobileNav() {
+  const pathname = usePathname();
+
+  const isActive = (path: string) => path === pathname;
   return (
     <SheetContent side="left" className="flex flex-col">
       <nav className="grid gap-2 text-lg font-medium">
         <Link
-          href="#"
+          href="/admin/dashboard"
           className="flex items-center gap-2 text-lg font-semibold"
         >
-          <Package2 className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
+          <div className="relative">
+            <div className="absolute inset-0 bg-white rounded-full shadow-md"></div>
+            <Image
+              src="/assets/nemsu-logo.png"
+              alt="Northern Eastern Mindanao State University"
+              width={40}
+              height={40}
+              className="relative z-10 shadow-xl rounded-full border-4 border-white"
+            />
+          </div>
+          <span className="text-lg">NEMSU LC</span>
         </Link>
         <Link
-          href="/dashboard"
-          className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+          href="/admin/dashboard"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/dashboard")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
         >
-          <Home className="h-5 w-5" />
+          <Home className="h-4 w-4" />
           Dashboard
         </Link>
         <Link
-          href="#"
-          className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+          href="/admin/customers"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/customers")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
         >
-          <Package className="h-5 w-5" />
+          <User className="h-4 w-4" />
+          Students
+        </Link>
+        <Link
+          href="/admin/faculty"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/faculty")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <UserCog className="h-4 w-4" />
+          Faculty
+        </Link>
+        <Link
+          href=""
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/course")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Album className="h-4 w-4" />
+          Courses
+        </Link>
+        <Link
+          href=""
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/subject")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <BookText className="h-4 w-4" />
+          Subjects
+        </Link>
+        <Link
+          href=""
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/subject")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <LayoutPanelTop className="h-4 w-4" />
+          Sections
+        </Link>
+        <Link
+          href=""
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/accounts")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <ContactRound className="h-4 w-4" />
+          Accounts
+        </Link>
+        <Link
+          href=""
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/evaluations")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <ChartBarBig className="h-4 w-4" />
+          Evaluations
+        </Link>
+        <Link
+          href="#"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/admin/products")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Package className="h-4 w-4" />
           Reports
         </Link>
         <Link
-          href="/customers"
-          className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-        >
-          <Users className="h-5 w-5" />
-          User
-        </Link>
-        <Link
           href="#"
-          className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+            isActive("/analytics")
+              ? "bg-muted text-primary"
+              : "text-muted-foreground"
+          }`}
         >
-          <LineChart className="h-5 w-5" />
+          <LineChart className="h-4 w-4" />
           Analytics
         </Link>
       </nav>

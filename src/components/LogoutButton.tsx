@@ -2,7 +2,7 @@
 
 import React, { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { logout } from "@/app/(auth)/Logout";
+import { logout } from "@/app/admin/(auth)/Logout";
 
 export default function LogoutMenuItem() {
   const [isPending, startTransition] = useTransition();
@@ -12,7 +12,7 @@ export default function LogoutMenuItem() {
     startTransition(async () => {
       try {
         await logout();
-        router.push("/");
+        router.push("/admin");
       } catch (error) {
         console.error("Logout failed:", error);
       }

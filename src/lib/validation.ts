@@ -4,11 +4,11 @@ const requiredString = z.string().trim().min(1, "Required");
 
 export const signUpSchema = z.object({
     email: requiredString.email("Invalid email address"),
-    username: requiredString.regex(
-        /^[a-zA-Z0-9_-]+$/,
-        "Only letters, numbers, - and _ allowed",
-    ),
     password: requiredString.min(8, "Must be at least 8 characters"),
+    Role: z.string().optional(),
+    avatarUrl: z.string().optional(),
+    adminID: requiredString.min(4, 'Must be at least 4 characters'),
+    fullname: requiredString.min(4, 'Must be at least 4 characters')
 });
 
 export type SignUpValues = z.infer<typeof signUpSchema>;
@@ -28,3 +28,14 @@ export const userSchema = z.object({
 
 export type UserValues = z.infer<typeof userSchema>
 
+export const courseSchema = z.object({
+    courseName: requiredString.min(4, 'Must be at least 4 characters')
+})
+
+export type CourseValues = z.infer<typeof courseSchema>
+
+export const subjectSchema = z.object({
+    subjectName: requiredString.min(4, 'Must be at least 4 characters')
+})
+
+export type SubjectValues = z.infer<typeof subjectSchema>

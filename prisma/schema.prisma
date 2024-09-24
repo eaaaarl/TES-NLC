@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -17,12 +12,25 @@ datasource db {
 }
 
 model User {
-  id           String    @id
-  username     String
-  email        String    @unique
-  avatarUrl    String?
-  passwordHash String
-  sessions     Session[]
+  id       String    @id @default(uuid())
+  email    String?   @unique
+  password String
+  sessions Session[]
+
+  Role Role @default(STUDENT)
+
+  Student       Student?
+  Faculty       Faculty?
+  Administrator Administrator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+enum Role {
+  ADMINISTRATOR
+  FACULTY
+  STUDENT
 }
 
 model Session {
@@ -32,9 +40,54 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Administrator {
+  id        String  @id @default(uuid())
+  avatarUrl String?
+  adminID   String  @unique
+  fullname  String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
 model Student {
-  id        String @id @default(uuid())
-  studentID String @unique
+  id        String  @id @default(uuid())
+  avatarUrl String?
+  studentID String  @unique
   fullname  String
   status    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  subjectID String  @unique
+  subject   Subject @relation(fields: [subjectID], references: [subject_id])
+
+  courseID String @unique
+  course   Course @relation(fields: [courseID], references: [course_id])
+}
+
+model Faculty {
+  id        String  @id @default(uuid())
+  avatarUrl String?
+  facultyID String  @unique
+  fullname  String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Course {
+  course_id  String   @id @default(uuid())
+  courseName String
+  Student    Student?
+}
+
+model Subject {
+  subject_id  String   @id @default(uuid())
+  subjectName String
+  Student     Student?
 }
