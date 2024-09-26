@@ -52,7 +52,7 @@ export default function MobileNav() {
           Dashboard
         </Link>
         <Link
-          href="/admin/customers"
+          href=""
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
             isActive("/admin/customers")
               ? "bg-muted text-primary"
@@ -63,7 +63,7 @@ export default function MobileNav() {
           Students
         </Link>
         <Link
-          href="/admin/faculty"
+          href=""
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
             isActive("/admin/faculty")
               ? "bg-muted text-primary"
@@ -74,9 +74,9 @@ export default function MobileNav() {
           Faculty
         </Link>
         <Link
-          href=""
+          href="/admin/courses"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/course")
+            isActive("/admin/courses")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -85,7 +85,7 @@ export default function MobileNav() {
           Courses
         </Link>
         <Link
-          href=""
+          href="/admin/subjects"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
             isActive("/admin/subject")
               ? "bg-muted text-primary"
