@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const, @typescript-eslint/no-explicit-any */
+
 "use client";
-import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
   Table,
   TableBody,
@@ -10,18 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { fetchSubject } from "./action";
 import { MoreHorizontal } from "lucide-react";
-import { fetchCourses } from "./action";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,21 +21,40 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteCourse } from "./mutation";
-import { EditModalForm } from "./EditModalForm";
+import { Button } from "@/components/ui/button";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import Pagination from "@/components/Pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { useDeleteSubject } from "./mutation";
+import { EditSubjectModalForm } from "./EditSubjectModalForm";
 
-export default function Course() {
+interface Subject {
+  subject_id: string;
+  subjectName: string;
+}
+
+interface Meta {
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+}
+export default function SubjectTable() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const [mounted, setMounted] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
-
-  const { mutateAsync: deleteCourse } = useDeleteCourse();
+  const [selectedSubject, setSelectedSubejct] = useState<Subject | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -54,26 +65,27 @@ export default function Course() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["courses", page, pageSize, debouncedSearch],
-    queryFn: () => fetchCourses(page, pageSize, debouncedSearch),
+  const { data, isLoading } = useQuery<{ data: Subject[]; meta: Meta }>({
+    queryKey: ["subjects", page, pageSize, debouncedSearch],
+    queryFn: () => fetchSubject(page, pageSize, debouncedSearch),
   });
+  const totalPages = data?.meta.pageCount ?? 1;
+  const totalEntries = data?.meta.total ?? 0;
 
-  const totalPages = data?.meta.pageCount || 0;
+  const { mutateAsync } = useDeleteSubject();
 
-  const handleEdit = (course: any) => {
-    setSelectedCourse(course);
-    setOpenModal(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this course?")) {
-      await deleteCourse(id);
+  const handleDeleteSubject = async (subject_id: string) => {
+    if (confirm("Are you sure you want to delete this subject.")) {
+      await mutateAsync(subject_id);
     }
   };
 
-  if (!mounted) return null;
+  const handleEditSubject = async (subject: Subject) => {
+    setOpenModal(true);
+    setSelectedSubejct(subject);
+  };
 
+  if (!mounted) return null;
   return (
     <>
       <div className="mb-4 flex justify-between items-center space-x-4">
@@ -91,7 +103,7 @@ export default function Course() {
           </SelectContent>
         </Select>
         <Input
-          placeholder="Search courses..."
+          placeholder="Search subjects..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-[180px]"
@@ -101,7 +113,7 @@ export default function Course() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Course Name</TableHead>
+            <TableHead>Subject Name</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -111,13 +123,13 @@ export default function Course() {
           ) : data?.data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={2} className="text-center text-destructive">
-                No courses available.
+                No subject available.
               </TableCell>
             </TableRow>
           ) : (
-            data?.data.map((course: any) => (
-              <TableRow key={course.course_id}>
-                <TableCell>{course.courseName}</TableCell>
+            data?.data.map((subject: Subject) => (
+              <TableRow key={subject.subject_id}>
+                <TableCell>{subject.subjectName}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -128,11 +140,13 @@ export default function Course() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleEdit(course)}>
+                      <DropdownMenuItem
+                        onClick={() => handleEditSubject(subject)}
+                      >
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(course.course_id)}
+                        onClick={() => handleDeleteSubject(subject.subject_id)}
                       >
                         Delete
                       </DropdownMenuItem>
@@ -144,16 +158,15 @@ export default function Course() {
           )}
         </TableBody>
       </Table>
-
-      <div className="mt-4 flex justify-between items-center">
+      <div className="mt-4 justify-between flex">
         <div>
           {isLoading ? (
             <Skeleton className="h-4 w-64" />
           ) : (
             `Showing ${(page - 1) * pageSize + 1} to ${Math.min(
               page * pageSize,
-              data?.meta.total
-            )} of ${data?.meta.total} entries`
+              totalEntries
+            )} of ${totalEntries} entries`
           )}
         </div>
         <Pagination
@@ -163,10 +176,9 @@ export default function Course() {
           isLoading={isLoading}
         />
       </div>
-
-      {selectedCourse && (
-        <EditModalForm
-          course={selectedCourse}
+      {selectedSubject && (
+        <EditSubjectModalForm
+          Subject={selectedSubject}
           onOpen={openModal}
           onClose={() => setOpenModal(false)}
         />

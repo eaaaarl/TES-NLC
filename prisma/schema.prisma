@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -51,11 +50,23 @@ model Administrator {
 }
 
 model Student {
-  id        String  @id @default(uuid())
-  avatarUrl String?
-  studentID String  @unique
-  fullname  String
-  status    String
+  id         String  @id @default(uuid())
+  studentID  String  @unique
+  firstname  String
+  lastname   String
+  middlename String?
+  email      String  @unique
+  gender     String
+  yearlevel  String
+  contact_no String?
+  status     String?
+  avatarUrl  String?
+
+  streetAddress  String
+  barangay       String
+  city           String
+  state_province String
+  postal_code    String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
@@ -63,10 +74,7 @@ model Student {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
-  subjectID String  @unique
-  subject   Subject @relation(fields: [subjectID], references: [subject_id])
-
-  courseID String @unique
+  courseID String
   course   Course @relation(fields: [courseID], references: [course_id])
 }
 
@@ -81,13 +89,17 @@ model Faculty {
 }
 
 model Course {
-  course_id  String   @id @default(uuid())
+  course_id  String    @id @default(uuid())
   courseName String
-  Student    Student?
+  Student    Student[]
 }
 
 model Subject {
-  subject_id  String   @id @default(uuid())
+  subject_id  String @id @default(uuid())
   subjectName String
-  Student     Student?
+}
+
+model Section {
+  section_id  String @id @default(uuid())
+  sectionName String
 }

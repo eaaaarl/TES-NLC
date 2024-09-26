@@ -2,10 +2,10 @@ import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,43 +17,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { courseSchema, CourseValues } from "@/lib/validation";
+import { subjectSchema, SubjectValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useUpdateCourse } from "./mutation";
+import { useUpdateSubject } from "./mutation";
 import { Loader2 } from "lucide-react";
 
-interface EditModalFormProps {
-  course: {
-    course_id: string;
-    courseName: string;
-  };
+interface Subject {
+  subject_id: string;
+  subjectName: string;
+}
+
+interface EditSubjectModalForm {
+  Subject: Subject;
   onOpen: boolean;
   onClose: () => void;
 }
 
-export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
-  const [error, setError] = useState();
-  const form = useForm<CourseValues>({
-    resolver: zodResolver(courseSchema),
+export function EditSubjectModalForm({
+  Subject,
+  onOpen,
+  onClose,
+}: EditSubjectModalForm) {
+  const form = useForm<SubjectValues>({
+    resolver: zodResolver(subjectSchema),
     defaultValues: {
-      courseName: "",
+      subjectName: "",
     },
   });
 
   useEffect(() => {
     form.reset({
-      courseName: course.courseName,
+      subjectName: Subject.subjectName,
     });
-  }, [form, course]);
-
-  const { mutateAsync, status } = useUpdateCourse();
-
-  const HandleUpdateCourse = async (values: CourseValues) => {
-    setError(undefined);
+  }, [form, Subject]);
+  const { mutateAsync, isPending } = useUpdateSubject();
+  const SubmitSubject = async (values: SubjectValues) => {
     await mutateAsync(
-      { id: course.course_id, values },
+      { subject_id: Subject.subject_id, values },
       {
         onSuccess: () => {
           onClose();
@@ -63,22 +65,23 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
   };
   return (
     <AlertDialog open={onOpen}>
-      <AlertDialogTrigger asChild>Edit</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Edit Course </AlertDialogTitle>
+          <AlertDialogTitle>Edit Subject</AlertDialogTitle>
+          <AlertDialogDescription>
+            Please enter the subjects details below.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(HandleUpdateCourse)}>
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+          <form onSubmit={form.handleSubmit(SubmitSubject)}>
             <FormField
               control={form.control}
-              name="courseName"
+              name="subjectName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Course Name</FormLabel>
+                  <FormLabel>Subject Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -87,8 +90,8 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
 
             <AlertDialogFooter className="mt-3">
               <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-              <Button type="submit" disabled={status === "pending"}>
-                {status === "pending" ? (
+              <Button type="submit" disabled={isPending}>
+                {isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Save"

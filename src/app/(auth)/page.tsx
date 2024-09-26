@@ -7,8 +7,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:"NEMSU LC STUDENT LOGIN"
-}
+  title: "NEMSU LC STUDENT LOGIN",
+};
 
 const LoginStudentPage = () => {
   return (
@@ -80,7 +80,7 @@ const LoginStudentPage = () => {
             </Button>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="underline">
+              <Link href="/signup" className="underline">
                 Sign up
               </Link>
             </div>

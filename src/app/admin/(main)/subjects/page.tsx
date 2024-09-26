@@ -5,6 +5,8 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import React from "react";
+import CreateSubjectModalForm from "./CreateSubjectModalForm";
+import SubjectTable from "./SubjectTable";
 
 export default function SubjectsPage() {
   return (
@@ -13,12 +15,15 @@ export default function SubjectsPage() {
         <h1 className="text-lg font-semibold md:text-2xl">
           {"List of Subject's"}
         </h1>
+        <CreateSubjectModalForm />
       </div>
       <Card>
         <CardHeader>
           <CardDescription>{"Manage Subject's"}</CardDescription>
         </CardHeader>
-        <CardContent></CardContent>
+        <CardContent>
+          <SubjectTable />
+        </CardContent>
       </Card>
     </main>
   );

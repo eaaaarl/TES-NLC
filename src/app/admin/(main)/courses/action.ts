@@ -26,7 +26,7 @@ export async function createCourse(values: CourseValues) {
 
 export const fetchCourses = async (page: number, pageSize: number, search: string) => {
     const response = await fetch(
-        `/api/admin/courses/get?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search).replace('/20%g/', '+')}`
+        `/api/admin/courses?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search).replace('/20%g/', '+')}`
     );
     if (!response.ok) {
         throw new Error("Failed to fetch courses");
