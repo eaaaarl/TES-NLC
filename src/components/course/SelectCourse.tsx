@@ -12,6 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { FormControl, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton from shadcn
+import { ControllerRenderProps, FieldValues } from "react-hook-form";
 
 interface Course {
   course_id: string;
@@ -25,7 +26,7 @@ const allCourse = async () => {
 };
 
 interface SelectCourseProps {
-  field: any; // Accept the field object from useForm
+  field: ControllerRenderProps<FieldValues, string>; // Accept the field object from useForm
 }
 
 export default function SelectCourse({ field }: SelectCourseProps) {
