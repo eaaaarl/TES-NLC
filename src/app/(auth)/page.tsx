@@ -13,10 +13,21 @@ export const metadata: Metadata = {
 };
 
 const checkSessionAndRedirect = async () => {
-  const { session } = await validateRequest();
+  const { session, user } = await validateRequest();
 
   if (session) {
-    redirect("/students/dashboard");
+    switch (user.Role) {
+      case "ADMINISTRATOR":
+        redirect("/admin/dashboard");
+        break;
+      case "FACULTY":
+        redirect("/faculty/dashboard");
+        break;
+      case "STUDENT":
+      default:
+        redirect("/students/dashboard");
+        break;
+    }
   }
 };
 
