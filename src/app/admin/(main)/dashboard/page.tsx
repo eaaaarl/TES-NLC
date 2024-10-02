@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "TES-NLC | DASHBOARD",
+  description:
+    "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
+};
 export default function dashboardPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

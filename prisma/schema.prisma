@@ -3,18 +3,21 @@ generator client {
 }
 
 datasource db {
+
   provider = "postgresql"
 
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  url = env("POSTGRES_URL_PRISMA_URL") // uses connection pooling
 
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  directUrl = env("POSTGRES_URL_URL_NON_POOLING") // uses a direct connection
+
 }
 
 model User {
-  id       String    @id @default(uuid())
-  email    String?   @unique
-  password String
-  sessions Session[]
+  id        String    @id @default(uuid())
+  email     String?   @unique
+  studentID String?   @unique
+  password  String
+  sessions  Session[]
 
   Role Role @default(STUDENT)
 
@@ -55,12 +58,13 @@ model Student {
   firstname  String
   lastname   String
   middlename String?
-  email      String  @unique
+  email      String? @unique
   gender     String
   yearlevel  String
   contact_no String?
   status     String?
   avatarUrl  String?
+  birthdate  String?
 
   streetAddress  String
   barangay       String

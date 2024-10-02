@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useUpdateCourse } from "./mutation";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditModalFormProps {
   course: {
@@ -34,6 +35,7 @@ interface EditModalFormProps {
 }
 
 export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
+  const { toast } = useToast();
   const [error, setError] = useState();
   const form = useForm<CourseValues>({
     resolver: zodResolver(courseSchema),
@@ -48,14 +50,17 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
     });
   }, [form, course]);
 
-  const { mutateAsync, status } = useUpdateCourse();
+  const { mutate, status } = useUpdateCourse();
 
-  const HandleUpdateCourse = async (values: CourseValues) => {
+  const HandleUpdateCourse = (values: CourseValues) => {
     setError(undefined);
-    await mutateAsync(
+    mutate(
       { id: course.course_id, values },
       {
         onSuccess: () => {
+          toast({
+            description: "Course Updated.",
+          });
           onClose();
         },
       }

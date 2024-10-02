@@ -7,7 +7,13 @@ import {
 import React from "react";
 import CreateSubjectModalForm from "./CreateSubjectModalForm";
 import SubjectTable from "./SubjectTable";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "TES-NLC | SUBJECTS",
+  description:
+    "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
+};
 export default function SubjectsPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

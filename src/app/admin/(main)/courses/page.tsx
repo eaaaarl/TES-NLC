@@ -7,7 +7,13 @@ import {
 import React from "react";
 import CreateModalForm from "./CreateModalForm";
 import Course from "./Course";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "TES-NLC | COURSE",
+  description:
+    "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
+};
 export default function CoursePage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

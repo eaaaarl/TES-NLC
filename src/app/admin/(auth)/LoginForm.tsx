@@ -17,29 +17,7 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-
-async function login(values: LoginValues) {
-  try {
-    const response = await fetch(`/api/admin/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const data = await response.json();
-    if (!data.ok) {
-      return {
-        ...data,
-      };
-    }
-    return { ...data };
-  } catch (error) {
-    console.error("Error in signUp:", error);
-    return {
-      success: false,
-      error: "An unexpected error occurred.",
-    };
-  }
-}
+import { login } from "./action";
 
 export default function LoginForm() {
   const { toast } = useToast();
@@ -65,9 +43,6 @@ export default function LoginForm() {
           title: message,
         });
       } else {
-        toast({
-          title: message,
-        });
         reset();
         router.push("/admin/dashboard");
       }
@@ -84,7 +59,7 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Enter email" type="email" {...field} />
+                <Input className="text-base" type="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,11 +72,7 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Enter password"
-                  type="password"
-                  {...field}
-                />
+                <Input type="password" className="text-base" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

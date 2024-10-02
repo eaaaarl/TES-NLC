@@ -22,7 +22,7 @@ export default function MobileNav() {
 
   const isActive = (path: string) => path === pathname;
   return (
-    <SheetContent side="left" className="flex flex-col">
+    <SheetContent side="left" className="flex flex-col ">
       <nav className="grid gap-2 text-lg font-medium">
         <Link
           href="/admin/dashboard"
@@ -33,9 +33,9 @@ export default function MobileNav() {
             <Image
               src="/assets/nemsu-logo.png"
               alt="Northern Eastern Mindanao State University"
-              width={40}
-              height={40}
-              className="relative z-10 shadow-xl rounded-full border-4 border-white"
+              width={50}
+              height={50}
+              className="relative z-10 shadow-xl rounded-full border-white"
             />
           </div>
           <span className="text-lg">NEMSU LC</span>

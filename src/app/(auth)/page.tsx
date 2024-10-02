@@ -1,20 +1,32 @@
+// File: pages/login.tsx
+
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Link from "next/link";
 import { Metadata } from "next";
+import LoginForm from "./StudentLoginForm";
+import { validateRequest } from "@/auth";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "NEMSU LC STUDENT LOGIN",
+  title: "TES-NLC | STUDENT LOGIN",
 };
 
-const LoginStudentPage = () => {
+const checkSessionAndRedirect = async () => {
+  const { session } = await validateRequest();
+
+  if (session) {
+    redirect("/students/dashboard");
+  }
+};
+
+const LoginStudentPage = async () => {
+  await checkSessionAndRedirect();
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex items-center justify-center  p-6 rounded-t-lg">
+        <div className="flex items-center justify-center p-6 rounded-t-lg">
           <Image
             src="/assets/nemsu-logo.png"
             height={300}
@@ -39,52 +51,7 @@ const LoginStudentPage = () => {
           <h2 className="text-lg sm:text-xl font-semibold">STUDENT LOGIN</h2>
         </CardHeader>
         <CardContent className="pt-6">
-          <form className="space-y-6">
-            <div>
-              <label
-                htmlFor="id"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Student ID
-              </label>
-              <Input id="id" name="id" type="text" required className="mt-1" />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1"
-              />
-            </div>
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Forgot Password?
-              </a>
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-blue-900 hover:bg-blue-800"
-            >
-              Sign In
-            </Button>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
-              </Link>
-            </div>
-          </form>
+          <LoginForm />
         </CardContent>
       </Card>
     </div>

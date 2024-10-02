@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "STUDENT REGISTER",
 };
 
-const LoginStudentPage = () => {
+const signUpStudent = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -48,4 +48,4 @@ const LoginStudentPage = () => {
   );
 };
 
-export default LoginStudentPage;
+export default signUpStudent;

@@ -2,26 +2,19 @@
 import { CourseValues } from "@/lib/validation";
 
 export async function createCourse(values: CourseValues) {
-    try {
-        const response = await fetch("/api/admin/courses", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-        });
-        const data = await response.json();
-        if (!data.ok) {
-            return {
-                ...data,
-            };
-        }
-        return { ...data };
-    } catch (error) {
-        console.error("Error in Creating course:", error);
-        return {
-            success: false,
-            error: "An unexpected error occurred.",
-        };
+
+    const response = await fetch("/api/admin/courses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+    });
+
+    if (!response.ok) {
+        throw new Error("Someting went Error")
     }
+
+    const data = await response.json();
+    return data;
 }
 
 export const fetchCourses = async (page: number, pageSize: number, search: string) => {

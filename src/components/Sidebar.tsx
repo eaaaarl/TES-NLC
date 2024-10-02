@@ -17,11 +17,8 @@ import {
 import Image from "next/image";
 
 export default function Sidebar() {
-  const pathname = usePathname(); // Get current route
-
-  // Function to check if a link is active
+  const pathname = usePathname();
   const isActive = (path: string) => pathname === path;
-  console.log("name path", pathname);
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-5">
@@ -35,9 +32,9 @@ export default function Sidebar() {
               <Image
                 src="/assets/nemsu-logo.png"
                 alt="Northern Eastern Mindanao State University"
-                width={40}
-                height={40}
-                className="relative z-10 shadow-xl rounded-full border-4 border-white"
+                width={60}
+                height={60}
+                className="relative z-10 shadow-xl rounded-full  border-white"
               />
             </div>
             <span className="text-sm text-center">

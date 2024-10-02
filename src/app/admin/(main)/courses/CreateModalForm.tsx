@@ -27,8 +27,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateCourseSchema } from "./mutation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreateModalForm() {
+  const { toast } = useToast();
   const [error, setError] = useState<string>();
   const form = useForm<CourseValues>({
     resolver: zodResolver(courseSchema),
@@ -36,11 +38,15 @@ export default function CreateModalForm() {
       courseName: "",
     },
   });
-  const mutation = useCreateCourseSchema();
+  const { mutate, status } = useCreateCourseSchema();
 
   const SubmitCourse = async (values: CourseValues) => {
     setError(undefined);
-    await mutation.mutateAsync(values);
+    mutate(values, {
+      onSuccess: () => {
+        toast({ description: "Course created." });
+      },
+    });
     form.reset();
   };
 
@@ -78,9 +84,9 @@ export default function CreateModalForm() {
             />
             <AlertDialogFooter className="mt-3">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button type="submit" disabled={mutation.status === "pending"}>
-                {mutation.status === "pending" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Button type="submit" disabled={status === "pending"}>
+                {status === "pending" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Submit"
                 )}

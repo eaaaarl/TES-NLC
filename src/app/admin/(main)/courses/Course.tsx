@@ -33,8 +33,10 @@ import { useDeleteCourse } from "./mutation";
 import { EditModalForm } from "./EditModalForm";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import Pagination from "@/components/Pagination";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Course() {
+  const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [search, setSearch] = useState("");
@@ -43,7 +45,7 @@ export default function Course() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
-  const { mutateAsync: deleteCourse } = useDeleteCourse();
+  const { mutate: deleteCourse } = useDeleteCourse();
 
   useEffect(() => {
     setMounted(true);
@@ -66,9 +68,13 @@ export default function Course() {
     setOpenModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this course?")) {
-      await deleteCourse(id);
+      deleteCourse(id, {
+        onSuccess: () => {
+          toast({ description: "Course deleted." });
+        },
+      });
     }
   };
 

@@ -1,17 +1,8 @@
 "use client";
 
-import React from "react";
-import { Input } from "@/components/ui/input";
+import React, { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import Link from "next/link";
 import BirthDate from "@/components/BirthDate";
 import SelectCourse from "@/components/course/SelectCourse";
@@ -27,8 +18,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import InputFields from "@/components/InputFields";
+import SelectFields from "@/components/SelectFields";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Loader2 } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
+import { signUpStudent } from "./action";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SignUpForm() {
+  const [error, setError] = useState<string>();
+  const [pending, startTransition] = useTransition(); // Track the loading state
+
   const form = useForm<StudentValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: {
@@ -41,6 +42,7 @@ export default function SignUpForm() {
       email: "",
       contact_no: "",
       birthdate: "",
+      gender: "",
       streetAddress: "",
       barangay: "",
       city: "",
@@ -51,146 +53,86 @@ export default function SignUpForm() {
     },
   });
 
+  const { toast } = useToast();
+  const { reset } = form;
   const signup = async (payload: StudentValues) => {
-    console.log(payload);
+    setError(undefined);
+    startTransition(async () => {
+      const { data, success } = await signUpStudent(payload);
+      if (success) {
+        toast({
+          description: "Successfully Registered!",
+        });
+        reset();
+      } else {
+        setError(data.error);
+        toast({
+          variant: "destructive",
+          title: "Failed to sign up",
+          description: data.error,
+        });
+      }
+    });
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(signup)} className="space-y-6">
-        {/* Full Name */}
+        {error && <p className="text-center text-destructive">{error}</p>}
         <div>
-          <Label htmlFor="fullName">Full Name</Label>
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <div className="flex-1">
-              <FormField
-                control={form.control}
+              <InputFields
+                label="First name"
                 name="firstname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        className="mt-1 w-full"
-                        placeholder="First name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeHolder="First Name"
+                control={form.control}
+                className="mt-1 w-full"
               />
             </div>
             <div className="flex-1">
-              <FormField
-                control={form.control}
+              <InputFields
+                label="Middle name"
                 name="middlename"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        className="mt-1 w-full"
-                        placeholder="Middle Name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeHolder="Middle Name"
+                control={form.control}
+                className="mt-1 w-full"
               />
             </div>
             <div className="flex-1">
-              <FormField
-                control={form.control}
+              <InputFields
+                label="Last name"
                 name="lastname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        className="mt-1 w-full"
-                        placeholder="Last name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeHolder="Last Name"
+                control={form.control}
+                className="mt-1 w-full"
               />
             </div>
           </div>
         </div>
 
-        {/* Student Number */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="studentID"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Student ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="mt-1 w-full"
-                      placeholder="Student ID"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="yearlevel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Year Level</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => field.onChange(value)}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="mt-1 w-full">
-                        <SelectValue placeholder="Select Year Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1st Year">1st Year</SelectItem>
-                        <SelectItem value="2nd Year">2nd Year</SelectItem>
-                        <SelectItem value="3rd Year">3rd Year</SelectItem>
-                        <SelectItem value="4th Year">4th Year</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Degree Program */}
-        <FormField
-          control={form.control}
-          name="degreeProgram"
-          render={({ field }) => <SelectCourse field={field} />}
-        />
-
-        {/* Email */}
         <div>
           <FormField
             control={form.control}
-            name="email"
+            name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Gender</FormLabel>
                 <FormControl>
-                  <Input
-                    className="mt-1 w-full"
-                    placeholder="Email"
-                    {...field}
-                  />
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-row space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="male" id="male" />
+                      <Label htmlFor="male">Male</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="female" id="female" />
+                      <Label htmlFor="female">Female</Label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -198,24 +140,52 @@ export default function SignUpForm() {
           />
         </div>
 
-        {/* Phone Number */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <InputFields
+              name="studentID"
+              label="Student ID"
+              control={form.control}
+              className="mt-1 w-full"
+            />
+          </div>
+          <div className="flex-1">
+            <SelectFields
+              control={form.control}
+              name="yearlevel"
+              label="Year Level"
+              options={[
+                { label: "1st Year", value: "1st Year" },
+                { label: "2nd Year", value: "2nd Year" },
+                { label: "3rd Year", value: "3rd Year" },
+                { label: "4th Year", value: "4th Year" },
+              ]}
+            />
+          </div>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="degreeProgram"
+          render={({ field }) => <SelectCourse field={field} />}
+        />
+
         <div>
-          <FormField
+          <InputFields
+            name="email"
+            label="Email"
+            types="email"
             control={form.control}
+            className="mt-1 w-full"
+          />
+        </div>
+
+        <div>
+          <InputFields
             name="contact_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact No</FormLabel>
-                <FormControl>
-                  <Input
-                    className="mt-1 w-full"
-                    placeholder="Contact No"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Contact No"
+            control={form.control}
+            className="mt-1 w-full"
           />
         </div>
 
@@ -223,9 +193,15 @@ export default function SignUpForm() {
           <FormField
             control={form.control}
             name="birthdate"
-            render={({ field }) => <BirthDate field={field} />}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <BirthDate field={field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <FormMessage />
         </div>
 
         <Address form={form} />
@@ -233,18 +209,13 @@ export default function SignUpForm() {
         <div className="mt-4">
           <div>
             <FormField
-              control={form.control}
               name="password"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      className="mt-1 w-full"
-                      placeholder="Password"
-                      {...field}
-                    />
+                    <PasswordInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -253,18 +224,13 @@ export default function SignUpForm() {
           </div>
           <div>
             <FormField
-              control={form.control}
               name="confirm_password"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      className="mt-1 w-full"
-                      placeholder="Confirm Password"
-                      {...field}
-                    />
+                    <PasswordInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -274,7 +240,13 @@ export default function SignUpForm() {
         </div>
 
         <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
-          Create an account
+          {pending ? (
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="animate-spin h-4 w-4" />
+            </div>
+          ) : (
+            "Create an account"
+          )}
         </Button>
         <div className="mt-4 text-center text-sm">
           {"Already have an account?"}{" "}

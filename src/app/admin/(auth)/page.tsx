@@ -8,10 +8,23 @@ import {
 
 import Image from "next/image";
 import LoginForm from "./LoginForm";
+import { Metadata } from "next";
+import { validateRequest } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export const metadata: Metadata = {
+  title: "TES-NLC | LOGIN",
+  description:
+    "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
+};
+export default async function LoginPage() {
+  const { user } = await validateRequest();
+  if (user) {
+    redirect("/students/dashboard");
+    return null;
+  }
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen overflow-x-hidden md:overflow-x-auto">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <div className="relative">
@@ -19,12 +32,14 @@ export default function LoginPage() {
             <Image
               src="/assets/nemsu-logo.png"
               alt="Northern Eastern Mindanao State University"
-              width={130}
-              height={130}
-              className="relative z-10 shadow-2xl rounded-full border-4 border-white"
+              width={140}
+              height={140}
+              className="relative z-10 shadow-2xl rounded-full  border-white"
             />
           </div>
-          <CardTitle className="text-2xl mt-4">TES-NLC</CardTitle>
+          <CardTitle className="text-2xl mt-4">
+            Teacher Evaluation System <br /> NEMSU-LC
+          </CardTitle>
           <CardDescription>
             Enter your email below to login to your account. This is the login
             for the administrator.
