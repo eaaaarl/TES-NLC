@@ -23,15 +23,7 @@ interface SelectCourseProps {
 export default function SelectCourse({ field }: SelectCourseProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["courses"],
-    queryFn: () =>
-      ky
-        .get(`/api/admin/courses/all-course`, {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-          },
-        })
-        .json<Course[]>(),
+    queryFn: () => ky.get(`/api/admin/courses/all-course`).json<Course[]>(),
   });
 
   return (
