@@ -14,11 +14,26 @@ import { FormControl, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton from shadcn
 import { Course } from "@/lib/types";
 import ky from "ky";
+import { GetStaticProps } from "next";
 
 interface SelectCourseProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: any;
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  const courses: Course[] = await ky
+    .get(`/api/admin/courses/all-course`)
+    .json();
+
+  return {
+    props: {
+      courses,
+    },
+    // Revalidate every 60 seconds (optional if not using manual revalidate)
+    revalidate: 60,
+  };
+};
 
 export default function SelectCourse({ field }: SelectCourseProps) {
   const { data, isLoading } = useQuery({

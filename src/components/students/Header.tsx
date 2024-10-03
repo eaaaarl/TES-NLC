@@ -8,26 +8,12 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import {
-  CircleUser,
-  ClipboardList,
-  Home,
-  Search,
-  Settings,
-} from "lucide-react";
+import { ClipboardList, Home, Search, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import TooltipLink from "./TooltipLink";
 import { Input } from "../ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import LogoutMenuItem from "./LogoutButton";
+import ProfileStudent from "./ProfileStudent";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -122,34 +108,7 @@ export default function Header() {
         </div>
       </div>
       <div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="ml-3 rounded-full "
-            >
-              {/* <Image
-                src="/placeholder-user.jpg"
-                width={36}
-                height={36}
-                alt="Avatar"
-                className="overflow-hidden rounded-full"
-              /> */}
-              <CircleUser className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogoutMenuItem />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProfileStudent />
       </div>
     </header>
   );

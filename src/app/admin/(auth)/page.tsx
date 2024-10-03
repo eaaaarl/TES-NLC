@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
 };
 export default async function LoginPage() {
-  const { user } = await validateRequest();
-  if (user) {
-    redirect("/students/dashboard");
+  const { session } = await validateRequest();
+  if (session) {
+    redirect("/admin/dashboard");
     return null;
   }
   return (
