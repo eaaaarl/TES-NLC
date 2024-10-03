@@ -26,6 +26,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { signUpStudent } from "./action";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -82,6 +83,12 @@ export default function SignUpForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(signup)} className="space-y-6">
         {error && <p className="text-center text-destructive">{error}</p>}
+        <Alert>
+          <AlertTitle>Registration Limited</AlertTitle>
+          <AlertDescription>
+            Registration is currently limited. Please try again later.
+          </AlertDescription>
+        </Alert>
         <div>
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <div className="flex-1">
