@@ -25,8 +25,10 @@ import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
 import { signUpStudent } from "./action";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/router";
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition(); // Track the loading state
 
@@ -64,6 +66,7 @@ export default function SignUpForm() {
           description: "Successfully Registered!",
         });
         reset();
+        router.push("/students/dashboard");
       } else {
         setError(data.error);
         toast({
@@ -239,7 +242,11 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
+        <Button
+          type="submit"
+          disabled={true}
+          className="w-full bg-blue-900 hover:bg-blue-800"
+        >
           {pending ? (
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="animate-spin h-4 w-4" />
