@@ -16,6 +16,7 @@ import { Course } from "@/lib/types";
 import ky from "ky";
 import { GetStaticProps } from "next";
 
+
 interface SelectCourseProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: any;
