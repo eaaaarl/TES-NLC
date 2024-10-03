@@ -25,7 +25,7 @@ import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
 import { signUpStudent } from "./action";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
   const router = useRouter();
