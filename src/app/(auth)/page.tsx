@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const checkSessionAndRedirect = async () => {
   const { session, user } = await validateRequest();
 
-  if (session) {
+  if (session?.userId) {
     switch (user.Role) {
       case "ADMINISTRATOR":
         redirect("/admin/dashboard");

@@ -6,9 +6,12 @@ export async function GET() {
   try {
     const { user } = await validateRequest();
     if (!user) {
-      return NextResponse.json({
-        error: "Unauthorized!",
-      });
+      return NextResponse.json(
+        {
+          error: "Unauthorized!",
+        },
+        { status: 403 }
+      );
     }
 
     const student = await prisma.student.findUnique({
@@ -17,6 +20,7 @@ export async function GET() {
       },
       include: {
         user: true,
+        course: true,
       },
     });
 

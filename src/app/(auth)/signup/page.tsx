@@ -5,12 +5,18 @@ import { Metadata } from "next";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import SignUpForm from "./SignUpForm";
+import { validateRequest } from "@/auth";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "STUDENT REGISTER",
 };
 
-const signUpStudent = () => {
+const signUpStudent = async () => {
+  const { user } = await validateRequest();
+  if (user) {
+    redirect("/students/dashboard");
+  }
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

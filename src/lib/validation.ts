@@ -3,89 +3,132 @@ import { z } from "zod";
 const requiredString = z.string().trim().min(1, "Required");
 
 export const signUpSchema = z.object({
-    email: requiredString.email("Invalid email address"),
-    password: requiredString.min(8, "Must be at least 8 characters"),
-    Role: z.string().optional(),
-    avatarUrl: z.string().optional(),
-    adminID: requiredString.min(4, 'Must be at least 4 characters'),
-    fullname: requiredString.min(4, 'Must be at least 4 characters')
+  email: requiredString.email("Invalid email address"),
+  password: requiredString.min(8, "Must be at least 8 characters"),
+  Role: z.string().optional(),
+  avatarUrl: z.string().optional(),
+  adminID: requiredString.min(4, "Must be at least 4 characters"),
+  fullname: requiredString.min(4, "Must be at least 4 characters"),
 });
 
 export type SignUpValues = z.infer<typeof signUpSchema>;
 
 export const loginSchema = z.object({
-    email: requiredString.email('Invalid email address'),
-    password: requiredString.min(8, 'Must be at least 8 characters')
-})
+  email: requiredString.email("Invalid email address"),
+  password: requiredString.min(8, "Must be at least 8 characters"),
+});
 
-export type LoginValues = z.infer<typeof loginSchema>
+export type LoginValues = z.infer<typeof loginSchema>;
 
 export const courseSchema = z.object({
-    courseName: requiredString.min(4, 'Must be at least 4 characters')
-})
+  courseName: requiredString.min(4, "Must be at least 4 characters"),
+});
 
-export type CourseValues = z.infer<typeof courseSchema>
+export type CourseValues = z.infer<typeof courseSchema>;
 
 export const subjectSchema = z.object({
-    subjectName: requiredString.min(4, 'Must be at least 4 characters')
-})
+  subjectName: requiredString.min(4, "Must be at least 4 characters"),
+});
 
-export type SubjectValues = z.infer<typeof subjectSchema>
+export type SubjectValues = z.infer<typeof subjectSchema>;
 
-export const studentSchema = z.object({
+export const studentSchema = z
+  .object({
     studentID: z
-        .string().min(1, 'Required')
-        .regex(/^\d{4}-\d{5}$/, { message: "Student ID must follow the format YYYY-NNNNN (e.g., 2024-01133)." }),
-    firstname: requiredString.min(2, 'First name must be at least 2 characters'),
+      .string()
+      .min(1, "Required")
+      .regex(/^\d{4}-\d{5}$/, {
+        message:
+          "Student ID must follow the format YYYY-NNNNN (e.g., 2024-01133).",
+      }),
+    firstname: requiredString.min(
+      2,
+      "First name must be at least 2 characters"
+    ),
     middlename: z.string().optional(),
     lastname: requiredString.min(2, "Last name must be at least 2 characters"),
     degreeProgram: requiredString,
 
-    email: z.string()
-        .email('Invalid email address') // Validates if it's a valid email format
-        .optional() // Makes the field optional
-        .refine((val) => val === undefined || val.trim() !== '', {
-            message: "Email cannot be empty if provided",
-        }),
+    email: z
+      .string()
+      .email("Invalid email address") // Validates if it's a valid email format
+      .optional() // Makes the field optional
+      .refine((val) => val === undefined || val.trim() !== "", {
+        message: "Email cannot be empty if provided",
+      }),
 
-
-    contact_no: z.string()
-        .optional()
-        .refine((val) => !val || val.length === 11, {
-            message: "Contact No must be exactly 11 characters",
-        }),
+    contact_no: z
+      .string()
+      .optional()
+      .refine((val) => !val || val.length === 11, {
+        message: "Contact No must be exactly 11 characters",
+      }),
     gender: requiredString,
     yearlevel: requiredString,
     birthdate: z
-        .string()
-        .min(10, 'Birthdate is required must follow the format YYYY-MM-DD')
-        .regex(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate must follow the format YYYY-MM-DD'),
+      .string()
+      .min(10, "Birthdate is required must follow the format YYYY-MM-DD")
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        "Birthdate must follow the format YYYY-MM-DD"
+      ),
     status: z.string().optional(),
     avatarUrl: z.string().optional(),
-    streetAddress: requiredString.min(4, 'Street Address must be at least 4 characters'),
-    barangay: z.string().min(2, 'Barangay Line 2 must be at least 4 characters'),
+    streetAddress: requiredString.min(
+      4,
+      "Street Address must be at least 4 characters"
+    ),
+    barangay: z
+      .string()
+      .min(2, "Barangay Line 2 must be at least 4 characters"),
     city: requiredString.min(4, "City must be at least 4 characters"),
-    state_province: requiredString.min(4, "State Province must be at least 4 characters"),
+    state_province: requiredString.min(
+      4,
+      "State Province must be at least 4 characters"
+    ),
     postal_code: z.string().regex(/^\d{4,6}$/, {
-        message: "Postal code must be between 4-6 digits",
+      message: "Postal code must be between 4-6 digits",
     }),
     password: z.string().min(8, "Password must be at least 8 characters"),
-    confirm_password: z.string().min(8, "Confirm password must be at least 8 characters"),
-
-    /*  userID: z.string().optional(),
-     courseID: requiredString, */
-}).refine((data) => data.password === data.confirm_password, {
+    confirm_password: z
+      .string()
+      .min(8, "Confirm password must be at least 8 characters"),
+  })
+  .refine((data) => data.password === data.confirm_password, {
     path: ["confirm_password"], // Point to the confirm_password field
     message: "Passwords do not match", // Custom error message
-});
+  });
 
-export type StudentValues = z.infer<typeof studentSchema>
+export type StudentValues = z.infer<typeof studentSchema>;
 
 export const studentLoginSchema = z.object({
-    studentID: z
-        .string().min(1, 'Required')
-        .regex(/^\d{4}-\d{5}$/, { message: "Invalid Student ID" }),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-})
+  studentID: z
+    .string()
+    .min(1, "Required")
+    .regex(/^\d{4}-\d{5}$/, { message: "Invalid Student ID" }),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-export type StudentLoginValues = z.infer<typeof studentLoginSchema>
+export type StudentLoginValues = z.infer<typeof studentLoginSchema>;
+
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: requiredString.min(
+      8,
+      "Current Password must be at least 8 characters"
+    ),
+    newPassword: requiredString.min(
+      8,
+      "New Password must be at least 8 characters"
+    ),
+    confirmPassword: requiredString.min(
+      8,
+      "Confirm Password must be at least 8 characters"
+    ),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Password do not match",
+  });
+
+export type ChangePasswordValues = z.infer<typeof ChangePasswordSchema>;

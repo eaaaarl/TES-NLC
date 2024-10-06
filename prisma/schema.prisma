@@ -3,10 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-
-  url = env("POSTGRES_URL_PRISMA_URL") // uses connection pooling
-
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL_PRISMA_URL") // uses connection pooling
   directUrl = env("POSTGRES_URL_URL_NON_POOLING") // uses a direct connection
 }
 
@@ -47,20 +45,20 @@ model Administrator {
   fullname  String
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Student {
-  id         String  @id @default(uuid())
-  studentID  String  @unique
+  id         String           @id @default(uuid())
+  studentID  String           @unique
   firstname  String
   lastname   String
   middlename String?
-  email      String? @unique
+  email      String?          @unique
   gender     String
   yearlevel  String
   contact_no String?
-  status     String?
+  status     EvaluationStatus @default(PENDING)
   avatarUrl  String?
   birthdate  String?
 
@@ -74,10 +72,16 @@ model Student {
   updatedAt DateTime @updatedAt()
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   courseID String
   course   Course @relation(fields: [courseID], references: [course_id])
+}
+
+enum EvaluationStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 model Faculty {
@@ -93,6 +97,7 @@ model Faculty {
 model Course {
   course_id  String    @id @default(uuid())
   courseName String
+  courseDep  String?
   Student    Student[]
 }
 

@@ -34,6 +34,7 @@ export default function StudentLoginForm() {
         form.reset();
       } else {
         toast({
+          title: "Failed to sign in",
           variant: "destructive",
           description: error,
         });

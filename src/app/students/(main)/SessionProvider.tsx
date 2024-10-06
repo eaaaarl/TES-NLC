@@ -8,9 +8,28 @@ import React, {
 } from "react";
 
 interface StudentInfo {
+  studentID: string;
+  id?: string;
   firstname: string;
+  middlename: string;
   lastname: string;
   avatarUrl?: string;
+  yearlevel: string;
+  gender: string;
+  birthdate: string;
+  contact_no: string;
+  streetAddress: string;
+  barangay: string;
+  city: string;
+  state_province: string;
+  postal_code: string;
+  email: string;
+  course: {
+    courseName: string;
+  };
+  user: {
+    id: string;
+  };
 }
 
 interface SessionContextType {

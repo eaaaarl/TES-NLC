@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -23,15 +23,14 @@ import SelectFields from "@/components/SelectFields";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
-import { signUpStudent } from "./action";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useSignUp } from "./mutation";
 
 export default function SignUpForm() {
   const router = useRouter();
   const [error, setError] = useState<string>();
-  const [pending, startTransition] = useTransition(); // Track the loading state
 
   const form = useForm<StudentValues>({
     resolver: zodResolver(studentSchema),
@@ -58,24 +57,24 @@ export default function SignUpForm() {
 
   const { toast } = useToast();
   const { reset } = form;
+  const { mutate, status } = useSignUp();
   const signup = async (payload: StudentValues) => {
     setError(undefined);
-    startTransition(async () => {
-      const { data, success } = await signUpStudent(payload);
-      if (success) {
-        toast({
-          description: "Successfully Registered!",
-        });
-        reset();
-        router.push("/students/dashboard");
-      } else {
-        setError(data.error);
-        toast({
-          variant: "destructive",
-          title: "Failed to sign up",
-          description: data.error,
-        });
-      }
+    mutate(payload, {
+      onSuccess: ({ data, success }) => {
+        if (success) {
+          router.push("/students/dashboard");
+          reset();
+          return;
+        } else {
+          setError(data.error);
+          toast({
+            title: "Failed to signup",
+            description: data.error,
+            variant: "destructive",
+          });
+        }
+      },
     });
   };
 
@@ -249,12 +248,8 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        <Button
-          type="submit"
-          disabled={true}
-          className="w-full bg-blue-900 hover:bg-blue-800"
-        >
-          {pending ? (
+        <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
+          {status === "pending" ? (
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="animate-spin h-4 w-4" />
             </div>
