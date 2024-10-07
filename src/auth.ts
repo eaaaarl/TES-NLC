@@ -3,6 +3,7 @@ import prisma from "./lib/prisma";
 import { Lucia, Session, User } from "lucia";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import cron from "node-cron";
 
 const adapter = new PrismaAdapter(
   prisma.session, // Session model
@@ -77,3 +78,18 @@ export const validateRequest = cache(
     return result;
   }
 );
+
+const deleteExpiredSessions = async () => {
+  try {
+    await lucia.deleteExpiredSessions();
+    console.log("Expired sessions deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting expired sessions:", error);
+  }
+};
+
+// Schedule the cleanup job
+cron.schedule("0 0 * * 0", () => {
+  console.log("Running cleanup of expired sessions...");
+  deleteExpiredSessions();
+});

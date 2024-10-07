@@ -10,8 +10,12 @@ export default async function MainLayout({
   children: React.ReactNode;
 }) {
   const { user } = await validateRequest();
-  if (!user) return redirect("/not-found");
-  if (user.Role !== "ADMINISTRATOR") return redirect("/unauthorized");
+  if (!user) {
+    return redirect("/not-found");
+  }
+  if (user.Role !== "ADMINISTRATOR") {
+    return redirect("/unauthorized");
+  }
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar />

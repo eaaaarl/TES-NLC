@@ -8,8 +8,21 @@ import {
 } from "@/components/ui/card";
 
 import SignUpForm from "./SignUpForm";
+import { validateRequest } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const { user } = await validateRequest();
+
+  if (user) {
+    if (user.Role === "ADMINISTRATOR") {
+      return redirect("/admin/dashboard");
+    } else if (user.Role === "FACULTY") {
+      return redirect("/faculty/dashboard");
+    } else if (user.Role === "STUDENT") {
+      return redirect("/students/dashboard");
+    }
+  }
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="mx-auto max-w-sm">

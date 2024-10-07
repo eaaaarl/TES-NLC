@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server"; // Import NextResponse
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -10,9 +12,12 @@ export async function GET() {
       },
     });
 
-    return Response.json(courses);
+    return NextResponse.json(courses);
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

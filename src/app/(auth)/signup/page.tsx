@@ -14,8 +14,15 @@ export const metadata: Metadata = {
 
 const signUpStudent = async () => {
   const { user } = await validateRequest();
+
   if (user) {
-    redirect("/students/dashboard");
+    if (user.Role === "ADMINISTRATOR") {
+      return redirect("/admin/dashboard");
+    } else if (user.Role === "FACULTY") {
+      return redirect("/faculty/dashboard");
+    } else if (user.Role === "STUDENT") {
+      return redirect("/students/dashboard");
+    }
   }
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">

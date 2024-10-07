@@ -25,9 +25,12 @@ export async function GET() {
     });
 
     if (!student) {
-      return NextResponse.json({
-        error: "Student not found!",
-      });
+      return NextResponse.json(
+        {
+          error: "Student not found!",
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(student);

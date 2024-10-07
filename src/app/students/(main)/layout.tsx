@@ -17,8 +17,12 @@ export default async function layout({
   children: React.ReactNode;
 }) {
   const { user } = await validateRequest();
-  if (!user) redirect("/not-found");
-  if (user.Role !== "STUDENT") return redirect("/unauthorized");
+  if (!user) {
+    redirect("/not-found");
+  }
+  if (user.Role !== "STUDENT") {
+    return redirect("/unauthorized");
+  }
   return (
     <SessionProvider>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">

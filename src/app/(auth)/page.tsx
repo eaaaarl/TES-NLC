@@ -1,5 +1,3 @@
-// File: pages/login.tsx
-
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Image from "next/image";
@@ -12,27 +10,18 @@ export const metadata: Metadata = {
   title: "TES-NLC | STUDENT LOGIN",
 };
 
-const checkSessionAndRedirect = async () => {
-  const { session, user } = await validateRequest();
+const LoginStudentPage = async () => {
+  const { user } = await validateRequest();
 
-  if (session?.userId) {
-    switch (user.Role) {
-      case "ADMINISTRATOR":
-        redirect("/admin/dashboard");
-        break;
-      case "FACULTY":
-        redirect("/faculty/dashboard");
-        break;
-      case "STUDENT":
-      default:
-        redirect("/students/dashboard");
-        break;
+  if (user) {
+    if (user.Role === "ADMINISTRATOR") {
+      return redirect("/admin/dashboard");
+    } else if (user.Role === "FACULTY") {
+      return redirect("/faculty/dashboard");
+    } else if (user.Role === "STUDENT") {
+      return redirect("/students/dashboard");
     }
   }
-};
-
-const LoginStudentPage = async () => {
-  await checkSessionAndRedirect();
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">

@@ -4,12 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Metadata } from "next";
+import { validateRequest } from "@/auth";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "NEMSU LC FACULTY LOGIN",
 };
 
-const LoginFacultyPage = () => {
+const LoginFacultyPage = async () => {
+  const { user } = await validateRequest();
+
+  if (user) {
+    if (user.Role === "ADMINISTRATOR") {
+      return redirect("/admin/dashboard");
+    } else if (user.Role === "FACULTY") {
+      return redirect("/faculty/dashboard");
+    } else if (user.Role === "STUDENT") {
+      return redirect("/students/dashboard");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

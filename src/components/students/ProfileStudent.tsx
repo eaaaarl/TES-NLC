@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import LogoutMenuItem from "./LogoutButton";
 import { Button } from "../ui/button";
 import { CircleUser, Lock, LogOut, User } from "lucide-react";
 import { useSession } from "@/app/students/(main)/SessionProvider";
@@ -16,8 +15,10 @@ import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
 import ChangePassword from "./ChangePassword";
 import { useRouter } from "next/navigation";
+import { logout } from "@/app/(auth)/Logout";
 
 export default function ProfileStudent() {
+  const [pending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const openModal = () => setIsDialogOpen(true);
   const router = useRouter();
@@ -25,6 +26,14 @@ export default function ProfileStudent() {
   const { studentInfo, loading, error } = useSession();
   if (error) return <div>Error: {error}</div>;
   const fullname = studentInfo?.firstname + " " + studentInfo?.lastname;
+
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logout();
+      router.push("/");
+    });
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -47,17 +56,27 @@ export default function ProfileStudent() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push("/students/profile")}>
-            <User className="mr-2 " />
-            Profile
+            {loading ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <>
+                <User className="mr-2 " /> Profile
+              </>
+            )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={openModal}>
-            <Lock className="mr-2" />
-            Change Password
+            {loading ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <>
+                <Lock className="mr-2" /> Change Password
+              </>
+            )}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout} disabled={pending}>
             <LogOut className="mr-2" />
-            <LogoutMenuItem />
+            {pending ? "Please wait" : "Logout"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
