@@ -1,33 +1,45 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { courseSchema } from "@/lib/validation";
+import { sectionSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const { user } = await validateRequest();
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const page = parseInt(req.nextUrl.searchParams.get("page") || "1");
     const pageSize = parseInt(req.nextUrl.searchParams.get("pageSize") || "5");
     const search = req.nextUrl.searchParams.get("search") || "";
-    const skip = (page - 1) * pageSize;
 
     const [data, total] = await Promise.all([
-      prisma.course.findMany({
+      prisma.section.findMany({
         where: {
-          courseName: {
+          sectionName: {
             contains: search,
+            mode: "insensitive",
           },
         },
-        include: {
-          Department: true,
+        orderBy: {
+          section_id: "desc",
         },
-        orderBy: { course_id: "desc" },
-        skip,
+        skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      prisma.course.count({
+      prisma.section.count({
         where: {
-          courseName: {
+          sectionName: {
             contains: search,
+            mode: "insensitive",
           },
         },
       }),
@@ -43,50 +55,44 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching courses:", error);
+    console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch courses" },
+      {
+        error: "Internal Server Error",
+      },
       { status: 500 }
     );
   }
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
     const { user } = await validateRequest();
     if (!user) {
       return NextResponse.json(
         {
-          success: false,
-          message: "Unauthorized",
+          error: "Unathorized!",
         },
         { status: 401 }
       );
     }
+    const payload = await req.json();
+    const { sectionName } = sectionSchema.parse(payload);
 
-    const requestPayload = await req.json();
-    const { courseName, departmentId } = courseSchema.parse(requestPayload);
-
-    const newCourse = await prisma.course.create({
+    const section = await prisma.section.create({
       data: {
-        courseName,
-        departmentId,
+        sectionName,
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "New Course Added!",
-      data: newCourse,
-    });
+    return NextResponse.json(section);
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       {
         error: "Internal Server Error",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

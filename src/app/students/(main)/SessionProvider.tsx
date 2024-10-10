@@ -7,7 +7,7 @@ import React, {
   useContext,
 } from "react";
 
-interface StudentInfo {
+export interface StudentInfo {
   studentID: string;
   id?: string;
   firstname: string;
@@ -55,6 +55,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
   useEffect(() => {
     async function fetchStudentInfo() {
+      setError(null);
       try {
         const res = await fetch("/api/student/auth/profile");
         if (!res.ok) {

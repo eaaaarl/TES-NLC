@@ -44,16 +44,23 @@ export default async function LoginPage() {
               className="relative z-10 shadow-2xl rounded-full  border-white"
             />
           </div>
-          <CardTitle className="text-2xl mt-4">
-            Teacher Evaluation System <br /> NEMSU-LC
-          </CardTitle>
+          <CardTitle className="text-2xl mt-4">Administrator Login</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account. This is the login
-            for the administrator.
+            Please enter your credentials to access the administrator dashboard.
+            This system allows you to manage faculty evaluations, view reports,
+            and more.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <LoginForm />
+          <div className="text-center mt-4">
+            <a
+              href="/forgot-password"
+              className="text-blue-600 hover:underline"
+            >
+              Forgot your password?
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -24,12 +24,11 @@ import { useForm } from "react-hook-form";
 import { useUpdateCourse } from "./mutation";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SelectDepartment from "@/components/course/SelectDepartment";
+import { Course } from "@/lib/types";
 
 interface EditModalFormProps {
-  course: {
-    course_id: string;
-    courseName: string;
-  };
+  course: Course;
   onOpen: boolean;
   onClose: () => void;
 }
@@ -41,12 +40,14 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
     resolver: zodResolver(courseSchema),
     defaultValues: {
       courseName: "",
+      departmentId: "",
     },
   });
 
   useEffect(() => {
     form.reset({
       courseName: course.courseName,
+      departmentId: course.Department.id,
     });
   }, [form, course]);
 
@@ -88,6 +89,12 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <FormField
+              control={form.control}
+              name="departmentId"
+              render={({ field }) => <SelectDepartment field={field} />}
             />
 
             <AlertDialogFooter className="mt-3">

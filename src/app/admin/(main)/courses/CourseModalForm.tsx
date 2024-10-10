@@ -26,47 +26,40 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreateCourseSchema } from "./mutation";
-import { useToast } from "@/hooks/use-toast";
+
 import SelectDepartment from "@/components/course/SelectDepartment";
 
-export default function CreateModalForm() {
-  const { toast } = useToast();
-  const [error, setError] = useState<string>();
+interface ModalProps {
+  title: string;
+  description: string;
+  initialValues: CourseValues;
+  onSubmit: (values: CourseValues) => Promise<void>;
+  buttonLabel: string;
+}
+
+export default function CourseModalForm({
+  title,
+  description,
+  initialValues,
+  onSubmit,
+  buttonLabel,
+}: ModalProps) {
   const form = useForm<CourseValues>({
     resolver: zodResolver(courseSchema),
-    defaultValues: {
-      courseName: "",
-      departmentId: "",
-    },
+    defaultValues: initialValues,
   });
-  const { mutate, status } = useCreateCourseSchema();
-
-  const SubmitCourse = async (values: CourseValues) => {
-    setError(undefined);
-    mutate(values, {
-      onSuccess: () => {
-        toast({ description: "Course created." });
-      },
-    });
-    form.reset();
-  };
-
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button>Create Course</Button>
+        <Button>{buttonLabel}</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Create a New Course</AlertDialogTitle>
-          <AlertDialogDescription>
-            Please enter the course details below.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(SubmitCourse)}>
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               name="courseName"
               control={form.control}

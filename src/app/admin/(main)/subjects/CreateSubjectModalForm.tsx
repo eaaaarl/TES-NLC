@@ -59,6 +59,7 @@ export default function CreateSubjectModalForm() {
                   <FormLabel>Subject Name</FormLabel>
                   <FormControl>
                     <Input
+                      className="text-base"
                       type="text"
                       placeholder="Enter subject name"
                       {...field}

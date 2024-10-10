@@ -77,7 +77,7 @@ export default function Course() {
       });
     }
   };
-
+  console.log(data);
   if (!mounted) return null;
 
   return (
@@ -100,7 +100,7 @@ export default function Course() {
           placeholder="Search courses..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-[180px]"
+          className="w-[180px] text-base"
         />
       </div>
 
@@ -108,6 +108,7 @@ export default function Course() {
         <TableHeader>
           <TableRow>
             <TableHead>Course Name</TableHead>
+            <TableHead>Department</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -121,9 +122,10 @@ export default function Course() {
               </TableCell>
             </TableRow>
           ) : (
-            data?.data.map((course: any) => (
+            data?.data.map((course) => (
               <TableRow key={course.course_id}>
                 <TableCell>{course.courseName}</TableCell>
+                <TableCell>{course.Department.departmentName}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -152,9 +154,9 @@ export default function Course() {
       </Table>
 
       <div className="mt-4 flex justify-between items-center">
-        <div>
+        <div className="hidden md:block">
           {isLoading ? (
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-4 w-full" />
           ) : (
             `Showing ${(page - 1) * pageSize + 1} to ${Math.min(
               page * pageSize,
@@ -162,12 +164,14 @@ export default function Course() {
             )} of ${data?.meta.total} entries`
           )}
         </div>
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          setPage={setPage}
-          isLoading={isLoading}
-        />
+        <div className="flex md:justify-end justify-center  w-full">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            setPage={setPage}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {selectedCourse && (

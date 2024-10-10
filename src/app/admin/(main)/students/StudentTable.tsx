@@ -102,11 +102,10 @@ export default function StudentTable() {
           placeholder="Search students..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-[200px]"
+          className="w-[200px] text-base"
         />
       </div>
 
-      {/* Table for larger screens */}
       <Table className="hidden lg:table">
         <TableHeader>
           <TableRow>
@@ -114,6 +113,7 @@ export default function StudentTable() {
             <TableHead className="hidden lg:table-cell">Full Name</TableHead>
             <TableHead className="hidden lg:table-cell">Year Level</TableHead>
             <TableHead>Department</TableHead>
+            <TableHead>Sections</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
@@ -123,24 +123,27 @@ export default function StudentTable() {
             Array.from({ length: pageSize }).map((_, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <Skeleton className="h-4" />
+                  <Skeleton className="h-4 w-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4" />
+                  <Skeleton className="h-4 w-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4" />
+                  <Skeleton className="h-4 w-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4" />
+                  <Skeleton className="h-4 w-full" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4" />
+                  <Skeleton className="h-4 w-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-full" />
                 </TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
-                    <Skeleton className="h-9 w-16" />
-                    <Skeleton className="h-9 w-20" />
+                    <Skeleton className="h-9 w-full" />
+                    <Skeleton className="h-9 w-full" />
                   </div>
                 </TableCell>
               </TableRow>
@@ -161,7 +164,10 @@ export default function StudentTable() {
                 <TableCell className="hidden lg:table-cell">
                   {student.yearlevel}
                 </TableCell>
-                <TableCell>{student.course.courseDep}</TableCell>
+                <TableCell>
+                  {student.course.Department.departmentName}
+                </TableCell>
+                <TableCell></TableCell>
                 <TableCell>
                   <Badge variant={"destructive"}>{student.status}</Badge>
                 </TableCell>
@@ -206,6 +212,11 @@ export default function StudentTable() {
               <Skeleton className="h-4 mb-2" />
               <Skeleton className="h-4 mb-2" />
               <Skeleton className="h-4 mb-2" />
+              <div className="grid grid-cols-3 gap-4">
+                <Skeleton className="h-4 mb-2" />
+                <Skeleton className="h-4 mb-2" />
+                <Skeleton className="h-4 mb-2" />
+              </div>
             </div>
           ))
         ) : data?.data.length === 0 ? (
@@ -217,21 +228,32 @@ export default function StudentTable() {
             <Card key={student.studentID} className="mb-4">
               <CardHeader>
                 <div className="flex justify-between">
-                  <h3 className="text-lg font-semibold">
-                    {student.firstname} {student.middlename} {student.lastname}
-                  </h3>
-                  <Badge variant={"destructive"}>{student.status}</Badge>
+                  <h3 className="text-lg font-semibold">{student.studentID}</h3>
+                  <div>
+                    <Badge variant={"destructive"}>{student.status}</Badge>
+                  </div>
                 </div>
-                <span className="text-sm text-muted-500">
-                  Student ID: {student.studentID}
-                </span>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">
+                    {student.firstname.toUpperCase()}{" "}
+                    {student.middlename.toUpperCase()}{" "}
+                    {student.lastname.toUpperCase()}
+                  </h3>
+                  <div className="font-semibold">BSCS-3A</div>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="mb-2">
-                  <strong>Year Level:</strong> {student.yearlevel}
-                </div>
-                <div className="mb-2">
-                  <strong>Department:</strong> {student.course.courseDep}
+                <div className="flex justify-between items-center">
+                  <div className="mb-2 flex-row">
+                    <div className="text-sm">Year Level</div>
+                    <div>{student.yearlevel.toUpperCase()}</div>
+                  </div>
+                  <div className="mb-2 flex-row">
+                    <div className="text-sm ">Department</div>
+                    <div>
+                      {student.course.Department.departmentName.toUpperCase()}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter>
@@ -252,11 +274,10 @@ export default function StudentTable() {
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="mt-4 flex justify-between">
-        <div>
+      <div className="mt-4 flex justify-between items-center">
+        <div className="hidden md:block">
           {isLoading ? (
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-4 w-full" />
           ) : (
             `Showing ${(page - 1) * pageSize + 1} to ${Math.min(
               page * pageSize,
@@ -264,12 +285,14 @@ export default function StudentTable() {
             )} of ${totalEntries} entries`
           )}
         </div>
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          setPage={setPage}
-          isLoading={isLoading}
-        />
+        <div className="flex md:justify-end justify-center  w-full">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            setPage={setPage}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </>
   );

@@ -14,15 +14,15 @@ export default function LoadingSkeleton({ pageSize }: SkeletonProps) {
         .map((_, index) => (
           <TableRow key={index}>
             <TableCell>
-              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-full" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-4 w-full" />
             </TableCell>
             <TableCell>
               <div className="flex space-x-2">
-                <Skeleton className="h-9 w-16" />
-                <Skeleton className="h-9 w-20" />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
               </div>
             </TableCell>
           </TableRow>

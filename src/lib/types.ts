@@ -5,7 +5,9 @@ export interface Students {
   middlename: string;
   lastname: string;
   course: {
-    courseDep: string;
+    Department: {
+      departmentName: string;
+    };
   };
   yearlevel: string;
   status: string;
@@ -15,4 +17,13 @@ export interface Students {
 export interface Course {
   course_id: string;
   courseName: string;
+  Department: {
+    id: string;
+    departmentName: string;
+  };
+}
+
+export interface Sections {
+  section_id: string;
+  sectionName: string;
 }

@@ -76,6 +76,9 @@ model Student {
 
   courseID String
   course   Course @relation(fields: [courseID], references: [course_id])
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 }
 
 enum EvaluationStatus {
@@ -95,18 +98,28 @@ model Faculty {
 }
 
 model Course {
-  course_id  String    @id @default(uuid())
-  courseName String
-  courseDep  String?
-  Student    Student[]
+  course_id    String     @id @default(uuid())
+  courseName   String
+  departmentId String
+  Department   Department @relation(fields: [departmentId], references: [id])
+
+  Student Student[]
+}
+
+model Department {
+  id             String   @id @default(uuid())
+  departmentName String
+  Course         Course[]
 }
 
 model Subject {
-  subject_id  String @id @default(uuid())
-  subjectName String
+  id           String @id @default(uuid())
+  subject_code String
+  subjectName  String
 }
 
 model Section {
-  section_id  String @id @default(uuid())
+  id          String    @id @default(uuid())
   sectionName String
+  Student     Student[]
 }

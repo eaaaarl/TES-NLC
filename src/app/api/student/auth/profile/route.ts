@@ -1,12 +1,11 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
-
+export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const { user } = await validateRequest();
     if (!user) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: "Unauthorized!",
         },
@@ -25,7 +24,7 @@ export async function GET() {
     });
 
     if (!student) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: "Student not found!",
         },
@@ -33,12 +32,9 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(student);
+    return Response.json(student);
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

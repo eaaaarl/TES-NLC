@@ -22,6 +22,7 @@ export type LoginValues = z.infer<typeof loginSchema>;
 
 export const courseSchema = z.object({
   courseName: requiredString.min(4, "Must be at least 4 characters"),
+  departmentId: requiredString,
 });
 
 export type CourseValues = z.infer<typeof courseSchema>;
@@ -31,6 +32,12 @@ export const subjectSchema = z.object({
 });
 
 export type SubjectValues = z.infer<typeof subjectSchema>;
+
+export const sectionSchema = z.object({
+  sectionName: requiredString.min(2, "Must be at least 2 characters"),
+});
+
+export type SectionValues = z.infer<typeof sectionSchema>;
 
 export const studentSchema = z
   .object({

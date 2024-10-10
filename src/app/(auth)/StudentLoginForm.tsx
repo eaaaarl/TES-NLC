@@ -80,7 +80,7 @@ export default function StudentLoginForm() {
         </div>
         <Button
           type="submit"
-          disabled={pending}
+          disabled={true}
           className="w-full bg-blue-900 hover:bg-blue-800"
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}

@@ -54,7 +54,7 @@ export default function MobileNav() {
         <Link
           href=""
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/customers")
+            isActive("/admin/students")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -65,7 +65,7 @@ export default function MobileNav() {
         <Link
           href=""
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/faculty")
+            isActive("/admin/facultys")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -87,7 +87,7 @@ export default function MobileNav() {
         <Link
           href="/admin/subjects"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/subject")
+            isActive("/admin/subjects")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -98,7 +98,7 @@ export default function MobileNav() {
         <Link
           href=""
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/subject")
+            isActive("/admin/sections")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -131,7 +131,7 @@ export default function MobileNav() {
         <Link
           href="#"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/admin/products")
+            isActive("/admin/reports")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}
@@ -142,7 +142,7 @@ export default function MobileNav() {
         <Link
           href="#"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-            isActive("/analytics")
+            isActive("/admin/analytics")
               ? "bg-muted text-primary"
               : "text-muted-foreground"
           }`}

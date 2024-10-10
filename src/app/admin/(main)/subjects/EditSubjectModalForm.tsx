@@ -81,7 +81,7 @@ export function EditSubjectModalForm({
                 <FormItem>
                   <FormLabel>Subject Name</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} />
+                    <Input className="text-base" type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

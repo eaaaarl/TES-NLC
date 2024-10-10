@@ -1,6 +1,7 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     const total = await prisma.student.count({
       where: {
         OR: [
-          { studentID: { contains: search  } },
+          { studentID: { contains: search } },
           { firstname: { contains: search } },
           { middlename: { contains: search } },
           { lastname: { contains: search } },
@@ -41,7 +42,11 @@ export async function GET(req: NextRequest) {
         ],
       },
       include: {
-        course: true,
+        course: {
+          include: {
+            Department: true,
+          },
+        },
       },
       skip: offset,
       take: pageSize,

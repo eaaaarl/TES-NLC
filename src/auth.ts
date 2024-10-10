@@ -88,7 +88,6 @@ const deleteExpiredSessions = async () => {
   }
 };
 
-// Schedule the cleanup job
 cron.schedule("0 0 * * 0", () => {
   console.log("Running cleanup of expired sessions...");
   deleteExpiredSessions();

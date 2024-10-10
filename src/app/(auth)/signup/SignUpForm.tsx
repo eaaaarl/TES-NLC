@@ -248,7 +248,11 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
+        <Button
+          type="submit"
+          disabled={true}
+          className="w-full bg-blue-900 hover:bg-blue-800"
+        >
           {status === "pending" ? (
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="animate-spin h-4 w-4" />
