@@ -26,11 +26,14 @@ export async function GET(req: NextRequest) {
         where: {
           sectionName: {
             contains: search,
-            mode: "insensitive",
           },
         },
+        include: {
+          yearLevel: true,
+          Department: true,
+        },
         orderBy: {
-          section_id: "desc",
+          yearLevelId: "desc",
         },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -39,7 +42,6 @@ export async function GET(req: NextRequest) {
         where: {
           sectionName: {
             contains: search,
-            mode: "insensitive",
           },
         },
       }),
@@ -77,11 +79,25 @@ export async function POST(req: NextRequest) {
       );
     }
     const payload = await req.json();
-    const { sectionName } = sectionSchema.parse(payload);
+    const { sectionName, yearLevelId, departmentId } =
+      sectionSchema.parse(payload);
+    const uniqueSection = await prisma.section.findUnique({
+      where: {
+        sectionName,
+      },
+    });
 
+    if (uniqueSection) {
+      return NextResponse.json(
+        { error: "A section name already exists." },
+        { status: 409 }
+      );
+    }
     const section = await prisma.section.create({
       data: {
         sectionName,
+        yearLevelId,
+        departmentId,
       },
     });
 

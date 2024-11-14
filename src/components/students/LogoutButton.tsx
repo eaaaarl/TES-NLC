@@ -9,10 +9,11 @@ export default function LogoutMenuItem() {
   const router = useRouter();
 
   async function handleLogout() {
+    router.push("/");
+
     startTransition(async () => {
       try {
         await logout();
-        router.push("/");
       } catch (error) {
         console.error("Logout failed:", error);
       }

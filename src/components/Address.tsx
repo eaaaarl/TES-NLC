@@ -24,13 +24,9 @@ export default function Address({ form }: AddressProps) {
         name="streetAddress"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Street Address</FormLabel>
+            <FormLabel>House No. / Street / Subdivision / Building</FormLabel>
             <FormControl>
-              <Input
-                className="mt-1 w-full"
-                placeholder="Street Address"
-                {...field}
-              />
+              <Input className="mt-1 w-full text-base" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -44,11 +40,7 @@ export default function Address({ form }: AddressProps) {
           <FormItem>
             <FormLabel>Barangay</FormLabel>
             <FormControl>
-              <Input
-                className="mt-1 w-full"
-                placeholder="Barangay"
-                {...field}
-              />
+              <Input className="mt-1 w-full text-base" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -63,13 +55,9 @@ export default function Address({ form }: AddressProps) {
             name="city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City / Municipality</FormLabel>
+                <FormLabel>City</FormLabel>
                 <FormControl>
-                  <Input
-                    className="mt-1 w-full"
-                    placeholder="City / Municipality"
-                    {...field}
-                  />
+                  <Input className="mt-1 w-full text-base" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -83,13 +71,9 @@ export default function Address({ form }: AddressProps) {
             name="state_province"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>State / Province</FormLabel>
+                <FormLabel>Province</FormLabel>
                 <FormControl>
-                  <Input
-                    className="mt-1 w-full"
-                    placeholder="State / Province"
-                    {...field}
-                  />
+                  <Input className="mt-1 w-full text-base" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -106,13 +90,9 @@ export default function Address({ form }: AddressProps) {
             name="postal_code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Postal / Zip Code</FormLabel>
+                <FormLabel>Postal Code</FormLabel>
                 <FormControl>
-                  <Input
-                    className="mt-1 w-full"
-                    placeholder="Postal / Zip Code"
-                    {...field}
-                  />
+                  <Input className="mt-1 w-full text-base" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

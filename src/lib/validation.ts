@@ -28,6 +28,7 @@ export const courseSchema = z.object({
 export type CourseValues = z.infer<typeof courseSchema>;
 
 export const subjectSchema = z.object({
+  subject_code: z.string().min(2, "Must be at least 2 characters").optional(),
   subjectName: requiredString.min(4, "Must be at least 4 characters"),
 });
 
@@ -35,6 +36,8 @@ export type SubjectValues = z.infer<typeof subjectSchema>;
 
 export const sectionSchema = z.object({
   sectionName: requiredString.min(2, "Must be at least 2 characters"),
+  yearLevelId: requiredString,
+  departmentId: requiredString,
 });
 
 export type SectionValues = z.infer<typeof sectionSchema>;
@@ -54,8 +57,6 @@ export const studentSchema = z
     ),
     middlename: z.string().optional(),
     lastname: requiredString.min(2, "Last name must be at least 2 characters"),
-    degreeProgram: requiredString,
-
     email: z
       .string()
       .email("Invalid email address") // Validates if it's a valid email format
@@ -72,6 +73,9 @@ export const studentSchema = z
       }),
     gender: requiredString,
     yearlevel: requiredString,
+    departmentId: requiredString,
+    sectionId: requiredString,
+    courseId: requiredString,
     birthdate: z
       .string()
       .min(10, "Birthdate is required must follow the format YYYY-MM-DD")
@@ -139,3 +143,60 @@ export const ChangePasswordSchema = z
   });
 
 export type ChangePasswordValues = z.infer<typeof ChangePasswordSchema>;
+
+export const StudentEditSchema = z.object({
+  studentID: z
+    .string()
+    .min(1, "Required")
+    .regex(/^\d{4}-\d{5}$/, {
+      message:
+        "Student ID must follow the format YYYY-NNNNN (e.g., 2024-01133).",
+    }),
+  firstname: z
+    .string()
+    .trim()
+    .min(1, "Required")
+    .min(2, "First name must be at least 2 characters"),
+  middlename: z.string().optional(),
+  lastname: z
+    .string()
+    .trim()
+    .min(1, "Required")
+    .min(2, "Last name must be at least 2 characters"),
+  courseId: z.string().trim().min(1, "Required"),
+  departmentId: z.string().trim().min(1, "Required"),
+  gender: z.string().trim().min(1, "Required"),
+});
+
+export type StudentEditValues = z.infer<typeof StudentEditSchema>;
+
+export const AcademicYearSchema = z.object({
+  year: requiredString.regex(
+    /^\d{4}-\d{4}$/,
+    "Academic year must be in the format 'YYYY-YYYY'"
+  ),
+  semester: requiredString,
+  isActive: z.boolean().optional(),
+});
+
+export type academicYearValues = z.infer<typeof AcademicYearSchema>;
+
+export const CategorySchema = z.object({
+  categoryName: requiredString.min(
+    4,
+    "Category name must be at least 4 characters"
+  ),
+});
+
+export type categoryValues = z.infer<typeof CategorySchema>;
+
+export const QuestionSchema = z.object({
+  categoryName: requiredString,
+  question: requiredString,
+  description: z.string().optional(),
+  required: z.boolean().default(true),
+  allowComments: z.boolean().default(true),
+  ratingScale: z.record(z.string(), z.string()).optional(),
+});
+
+export type questionValues = z.infer<typeof QuestionSchema>;

@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const courses = await prisma.course.findMany({
       select: {
-        course_id: true,
+        id: true,
         courseName: true,
       },
     });

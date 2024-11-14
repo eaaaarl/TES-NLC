@@ -3,18 +3,162 @@ import { Button } from "@/components/ui/button";
 import {
   Album,
   Atom,
-  CircleUser,
   Facebook,
   House,
   Info,
+  LucideIcon,
   Mail,
   Video,
 } from "lucide-react";
-import { useSession } from "../SessionProvider";
+import Image from "next/image";
+import React, { lazy, Suspense, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getStudent } from "./action";
+import { useSubmitAvatar } from "./mutation";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import Resizer from "react-image-file-resizer";
+import ProfileSkeleton from "./ProfileSectionSkeleton";
+
+const CropImageDialog = lazy(() => import('@/components/CropImageDialog'));
+
+const ProfileSection = ({ title, icon: Icon, children }: { title: string, icon: LucideIcon, children: React.ReactNode }) => {
+  return (<>
+    <div className="mx-10 mt-10 flex items-center">
+      <Icon className="mr-4 text-blue-900" />
+      <span className="text-1xl text-blue-900 font-bold">{title}</span>
+    </div>
+    {children}
+  </>)
+}
+
+const ProfileField = ({
+  className,
+  label,
+  isLoading,
+  value,
+  transform = 'none'
+}: {
+  className?: string,
+  label: string,
+  value?: string | number,
+  isLoading: boolean,
+  transform?: 'uppercase' | 'lowercase' | 'none'
+}) => {
+  const transformValue = (val: string | number | undefined) => {
+    if (typeof val === 'string') {
+      switch (transform) {
+        case 'uppercase':
+          return val.toUpperCase();
+        case 'lowercase':
+          return val.toLowerCase();
+        default:
+          return val;
+      }
+    }
+    return val;
+  };
+
+  return (
+    <div className={className}>
+      <p className="text-gray-400 text-sm">{label}</p>
+      {isLoading ? (
+        <Skeleton className="h-6 w-full my-3" />
+      ) : (
+        <p className={`mb-3 ${!value ? "mt-9" : ""}`}>
+          {transformValue(value) || ""}
+        </p>
+      )}
+      <hr />
+    </div>
+  );
+};
+
+const CropDialogSkeleton = () => (
+  <div className="w-[500px] max-w-md mx-auto p-6 space-y-4">
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+    <Skeleton className="h-64 w-full rounded-lg" />
+    <div className="flex justify-end space-x-2">
+      <Skeleton className="h-10 w-20" />
+      <Skeleton className="h-10 w-20" />
+    </div>
+  </div>
+);
 
 export default function ProfilePage() {
-  const { studentInfo } = useSession();
+  const { toast } = useToast()
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const inputFileRef = useRef<HTMLInputElement | null>(null);
 
+  const { data: studentInfo, isLoading, isError } = useQuery({
+    queryKey: ["students"],
+    queryFn: getStudent,
+  });
+
+  const resizeFile = (file: File) =>
+    new Promise<string>((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        1024,
+        1024,
+        "webp",
+        100,
+        0,
+        (uri) => {
+          resolve(uri as string);
+        },
+        "base64"
+      );
+    });
+
+  const handleImageSelection = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const resizedImageUrl = await resizeFile(file);
+      setSelectedImage(resizedImageUrl);
+      setDialogOpen(true);
+    }
+  };
+
+
+  const { mutate, status } = useSubmitAvatar()
+  const handleTakePhoto = async (blob: Blob | null) => {
+    if (blob && studentInfo) {
+      const file = new File([blob], `avatar_${studentInfo.id}.webp`, {
+        type: "image/webp",
+      });
+      mutate({ avatar: file }, {
+        onSuccess: () => {
+          toast({
+            description: "Avatar updated.",
+          });
+          setDialogOpen(false);
+        },
+        onError: () => {
+          toast({
+            description: "Failed to update avatar. Please try again.",
+            variant: "destructive",
+          });
+        },
+      });
+    }
+
+  };
+  const handleFileInputClick = () => {
+    inputFileRef.current?.click();
+  };
+
+  if (isLoading) {
+    return <ProfileSkeleton />
+  }
+
+  if (isError) return <p>Error loading student data</p>;
   return (
     <div className="min-h-screen flex justify-center items-center my-10">
       <div className="w-full max-w-4xl p-4 bg-white shadow-lg rounded-lg">
@@ -26,230 +170,276 @@ export default function ProfilePage() {
 
         <div className="flex justify-center">
           <div className="flex flex-col items-center">
-            {/* <Image
-              src="/asssets/nemsu-logo.png"
-              alt="Profile"
-              width={128}
-              height={128}
-              className=" rounded-full object-cover mb-4"
-            /> */}
-            <CircleUser className="h-32 w-32 rounded-full object-cover mb-4" />
+            {isLoading ? (<Skeleton className="w-[250px] h-[250px] rounded-full mb-3" />) : (
+              <Image
+                src={studentInfo?.avatarUrl || '/default-user.png'}
+                alt="Profile"
+                width={250}
+                height={250}
+                className="mb-3 shadow-lg border rounded-lg"
+              />
+            )}
+
+            <input
+              ref={inputFileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelection}
+              style={{ display: "none" }}
+            />
+
             <Button
               className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-              disabled={true}
+              onClick={handleFileInputClick}
             >
               Take a Photo
             </Button>
           </div>
         </div>
 
-        {/* Student No. */}
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+              <div className="bg-white rounded-lg">
+                <CropDialogSkeleton />
+              </div>
+            </div>
+          }
+        >
+          {dialogOpen && (<CropImageDialog
+            src={selectedImage}
+            onCropped={handleTakePhoto}
+            onOpen={dialogOpen}
+            cropAspectRatio={1}
+            onClose={() => setDialogOpen(false)}
+            isLoading={status === 'pending'}
+          />)}
+        </Suspense>
+
+
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-10 mb-5">
           <div>
-            <p className="text-gray-400 text-sm">Student No.</p>
-            <p className="mb-3">{studentInfo?.studentID}</p>
-            <hr />
+            <ProfileField
+              label="Student No."
+              value={studentInfo?.studentID}
+              isLoading={isLoading}
+            />
           </div>
         </div>
 
         {/* Full Name Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-10">
           <div>
-            <p className="text-gray-400 text-sm">First name</p>
-            <p className="mb-3">{studentInfo?.firstname.toUpperCase()}</p>
-            <hr />
+            <ProfileField
+              label="First name"
+              value={studentInfo?.firstname.toUpperCase()}
+              isLoading={isLoading}
+            />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Middle name</p>
-            <p className={`mb-3 ${!studentInfo?.middlename ? "mt-9" : ""}`}>
-              {studentInfo?.middlename.toUpperCase()}
-            </p>
-            <hr />
+            <ProfileField
+              label="Middle name"
+              value={studentInfo?.middlename.toUpperCase()}
+              isLoading={isLoading}
+            />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Last name</p>
-            <p className="mb-3">{studentInfo?.lastname.toUpperCase()}</p>
-            <hr />
+            <ProfileField
+              label="Last name"
+              value={studentInfo?.lastname.toUpperCase()}
+              isLoading={isLoading}
+            />
           </div>
           <div>
-            <p className="text-gray-400 text-sm mb-9">Suffix</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+            <ProfileField
+              label="Suffix"
+              isLoading={isLoading}
+            />
           </div>
         </div>
 
         {/* Learner's Ref Number */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-10 mb-5">
           <div>
-            <p className="text-gray-400 text-sm">Learner&apos;s Ref Number</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+            <ProfileField
+              label="Learner&apos;s Ref Number"
+              isLoading={isLoading}
+            />
           </div>
         </div>
 
         {/* Course Year Section */}
-        <div className="mx-10 mt-10 flex items-center">
-          <Album className="mr-4 text-blue-900" />
-          <span className="text-1xl text-blue-900 font-bold">COURSE YEAR</span>
-        </div>
+        <ProfileSection title='COURSE YEAR' icon={Album} >
+          <div className="mx-10 mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            <div>
+              <ProfileField
+                label="Course"
+                value={studentInfo?.course.courseName.toUpperCase()}
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Department"
+                value={studentInfo?.department.departmentName.toUpperCase()}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+          <div className="mx-10 grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+            <div>
+              <ProfileField
+                label="Year Level"
+                value={studentInfo?.section.yearLevel.yearName.toUpperCase()}
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Section"
+                value={studentInfo?.section.sectionName.toUpperCase()}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </ProfileSection>
 
-        <div className="mx-10 mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          <div>
-            <p className="text-gray-400 text-sm">Course</p>
-            <p className="mb-3">
-              {studentInfo?.course.courseName.toUpperCase()}
-            </p>
-            <hr />
+        <ProfileSection title="PERSONAL INFO" icon={Info}>
+          <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div>
+              <ProfileField
+                label="Gender"
+                value={studentInfo?.gender.toUpperCase()}
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Civil Status"
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Birthday"
+                value={studentInfo?.birthdate}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-gray-400 text-sm">Year Level</p>
-            <p className="mb-3">{studentInfo?.yearlevel.toUpperCase()}</p>
-            <hr />
-          </div>
-        </div>
-        <div className="mx-10 grid grid-cols-1 gap-4 mt-5">
-          <div>
-            <p className="text-gray-400 text-sm">Curriculum</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-        </div>
 
-        <div className="mx-10 mt-10 flex items-center">
-          <Info className="mr-4 text-blue-900" />
-          <span className="text-1xl text-blue-900 font-bold">
-            PERSONAL INFO
-          </span>
-        </div>
+          <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <ProfileField
+                label="Birth Place"
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Age"
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
 
-        <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div>
-            <p className="text-gray-400 text-sm">Gender</p>
-            <p className="mb-3">{studentInfo?.gender.toUpperCase()}</p>
-            <hr />
+          <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div>
+              <ProfileField
+                label="Nationality"
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Religion"
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <ProfileField
+                label="Ethnicity"
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-gray-400 text-sm">Civil Status</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-          <div>
-            <p className="text-gray-400 text-sm">Birthday</p>
-            <p className="mb-3">{studentInfo?.birthdate}</p>
-            <hr />
-          </div>
-        </div>
+        </ProfileSection>
 
-        <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="col-span-2">
-            <p className="text-gray-400 text-sm ">Birth Place</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+        <ProfileSection title="CONTACT & ADDRESS" icon={House}>
+          <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
+            <div className="col-span-2">
+              <ProfileField
+                label="Contact Number"
+                value={studentInfo?.contact_no}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-gray-400 text-sm">Age</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+          <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
+            <div className="col-span-2">
+              <p className="text-gray-400 text-sm ">Permanent Address</p>
+              <p className="mb-3">
+                {studentInfo?.streetAddress.toUpperCase()},{" "}
+                {studentInfo?.barangay.toUpperCase()}{" "}
+                {studentInfo?.city.toUpperCase()},{" "}
+                {studentInfo?.state_province.toUpperCase()},{" "}
+                {studentInfo?.postal_code}
+              </p>
+              <hr />
+            </div>
           </div>
-        </div>
+          <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
+            <div className="col-span-2">
+              <p className="text-gray-400 text-sm ">Current Address</p>
+              <p className="mb-3">
+                {studentInfo?.streetAddress.toUpperCase()},{" "}
+                {studentInfo?.barangay.toUpperCase()}{" "}
+                {studentInfo?.city.toUpperCase()},{" "}
+                {studentInfo?.state_province.toUpperCase()},{" "}
+                {studentInfo?.postal_code}
+              </p>
+              <hr />
+            </div>
+          </div>
+        </ProfileSection>
 
-        <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div>
-            <p className="text-gray-400 text-sm">Nationality</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+        <ProfileSection title="SOCIAL MEDIA ACCOUNTS" icon={Atom}>
+          <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <Mail className="mr-3 float-start items-center" />
+              <ProfileField
+                label="Email"
+                value={studentInfo?.email}
+                isLoading={isLoading}
+                transform="lowercase"
+              />
+            </div>
+            <div>
+              <Facebook className="mr-3 float-start items-center" />
+              <ProfileField
+                label="Facebook"
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-gray-400 text-sm">Religion</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
+          <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <Mail className="mr-3 float-start items-center" />
+              <ProfileField
+                label="Skype"
+                isLoading={isLoading}
+              />
+            </div>
+            <div>
+              <Video className="mr-3 float-start items-center" />
+              <ProfileField
+                label="Zoom"
+                isLoading={isLoading}
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-gray-400 text-sm">Ethnicity</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-        </div>
-
-        <div className="mx-10 mt-10 flex items-center">
-          <House className="mr-4 text-blue-900" />
-          <span className="text-1xl text-blue-900 font-bold">
-            CONTACT & ADDRESS
-          </span>
-        </div>
-
-        <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
-          <div className="col-span-2">
-            <p className="text-gray-400 text-sm ">Contact Number</p>
-            <p className={`mb-3 ${!studentInfo?.contact_no ? "mt-9" : ""}`}>
-              {studentInfo?.contact_no}
-            </p>
-            <hr />
-          </div>
-        </div>
-        <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
-          <div className="col-span-2">
-            <p className="text-gray-400 text-sm ">Permanent Address</p>
-            <p className="mb-3">
-              {studentInfo?.streetAddress.toUpperCase()},{" "}
-              {studentInfo?.barangay.toUpperCase()}{" "}
-              {studentInfo?.city.toUpperCase()},{" "}
-              {studentInfo?.state_province.toUpperCase()},{" "}
-              {studentInfo?.postal_code}
-            </p>
-            <hr />
-          </div>
-        </div>
-        <div className="mx-10 mt-5 grid grid-cols-1 gap-4">
-          <div className="col-span-2">
-            <p className="text-gray-400 text-sm ">Current Address</p>
-            <p className="mb-3">
-              {studentInfo?.streetAddress.toUpperCase()},{" "}
-              {studentInfo?.barangay.toUpperCase()}{" "}
-              {studentInfo?.city.toUpperCase()},{" "}
-              {studentInfo?.state_province.toUpperCase()},{" "}
-              {studentInfo?.postal_code}
-            </p>
-            <hr />
-          </div>
-        </div>
-
-        <div className="mx-10 mt-10 flex items-center">
-          <Atom className="mr-4 text-blue-900" />
-          <span className="text-1xl text-blue-900 font-bold">
-            SOCIAL MEDIA ACCOUNTS
-          </span>
-        </div>
-
-        <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <Mail className="mr-3 float-start items-center" />
-            <p className="text-gray-400 text-sm ">Email</p>
-            <p className="mb-3">{studentInfo?.email}</p>
-            <hr />
-          </div>
-          <div>
-            <Facebook className="mr-3 float-start items-center" />
-            <p className="text-gray-400 text-sm">Facebook</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-        </div>
-        <div className="mx-10 mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <Mail className="mr-3 float-start items-center" />
-            <p className="text-gray-400 text-sm ">Skype</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-          <div>
-            <Video className="mr-3 float-start items-center" />
-            <p className="text-gray-400 text-sm">Zoom</p>
-            <p className="mb-3 mt-9"></p>
-            <hr />
-          </div>
-        </div>
+        </ProfileSection>
       </div>
-    </div>
+    </div >
   );
 }

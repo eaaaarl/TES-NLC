@@ -20,6 +20,12 @@ export async function GET() {
       include: {
         user: true,
         course: true,
+        department: true,
+        section: {
+          include: {
+            yearLevel: true,
+          },
+        },
       },
     });
 

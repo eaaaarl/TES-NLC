@@ -12,7 +12,8 @@ interface InputFieldsProps {
   //eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any;
   name: string;
-  label?: string;
+  //eslint-disable-next-line @typescript-eslint/no-explicit-any
+  label?: any;
   types?: string;
   placeHolder?: string;
   className?: string;

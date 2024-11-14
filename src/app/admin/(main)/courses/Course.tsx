@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { fetchCourses } from "./action";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,21 +21,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDeleteCourse } from "./mutation";
 import { EditModalForm } from "./EditModalForm";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
 import Pagination from "@/components/Pagination";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import { Course } from "@/lib/types";
+import CourseTableLoadingSkeleton from "./CourseTableLoadingSkeleton";
 
-export default function Course() {
+export default function CourseTable() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -44,6 +46,9 @@ export default function Course() {
   const [mounted, setMounted] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [openOnconfirmDeleteDialog, setOpenConfirmDeleteDialog] =
+    useState<boolean>(false);
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
 
   const { mutate: deleteCourse } = useDeleteCourse();
 
@@ -63,22 +68,35 @@ export default function Course() {
 
   const totalPages = data?.meta.pageCount || 0;
 
-  const handleEdit = (course: any) => {
+  const handleEdit = (course: Course) => {
     setSelectedCourse(course);
     setOpenModal(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this course?")) {
-      deleteCourse(id, {
+  const openDeleteDialog = (course: Course) => {
+    setOpenConfirmDeleteDialog(true);
+    setCourseToDelete(course);
+  };
+
+  const handleDelete = () => {
+    if (courseToDelete) {
+      deleteCourse(courseToDelete.id, {
         onSuccess: () => {
-          toast({ description: "Course deleted." });
+          toast({
+            description: "Deleted Course.",
+          });
         },
       });
     }
+    setOpenConfirmDeleteDialog(false);
+    setCourseToDelete(null);
   };
-  console.log(data);
+
   if (!mounted) return null;
+
+  if (isLoading) {
+    return <CourseTableLoadingSkeleton rowCount={pageSize} />
+  }
 
   return (
     <>
@@ -113,9 +131,7 @@ export default function Course() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            <LoadingSkeleton pageSize={pageSize} />
-          ) : data?.data.length === 0 ? (
+          {data?.data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={2} className="text-center text-destructive">
                 No courses available.
@@ -123,9 +139,9 @@ export default function Course() {
             </TableRow>
           ) : (
             data?.data.map((course) => (
-              <TableRow key={course.course_id}>
+              <TableRow key={course.id}>
                 <TableCell>{course.courseName}</TableCell>
-                <TableCell>{course.Department.departmentName}</TableCell>
+                <TableCell>{course.department.departmentName}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -137,11 +153,14 @@ export default function Course() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => handleEdit(course)}>
+                        <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleDelete(course.course_id)}
+                        onClick={() => openDeleteDialog(course)}
                       >
+                        <Trash className="mr-2 h-4 w-4 text-red-600" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -154,15 +173,10 @@ export default function Course() {
       </Table>
 
       <div className="mt-4 flex justify-between items-center">
-        <div className="hidden md:block">
-          {isLoading ? (
-            <Skeleton className="h-4 w-full" />
-          ) : (
-            `Showing ${(page - 1) * pageSize + 1} to ${Math.min(
-              page * pageSize,
-              data?.meta.total
-            )} of ${data?.meta.total} entries`
-          )}
+        <div className="hidden md:block w-full">
+          Showing {(page - 1) * pageSize + 1} to{" "}
+          {Math.min(page * pageSize, data?.meta.total ?? 0)} of{" "}
+          {data?.meta.total} entries
         </div>
         <div className="flex md:justify-end justify-center  w-full">
           <Pagination
@@ -181,6 +195,13 @@ export default function Course() {
           onClose={() => setOpenModal(false)}
         />
       )}
+
+      <ConfirmDeleteDialog
+        isOpen={openOnconfirmDeleteDialog}
+        onCancel={() => setOpenConfirmDeleteDialog(false)}
+        itemName={courseToDelete?.courseName}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

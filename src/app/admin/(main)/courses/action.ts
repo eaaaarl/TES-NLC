@@ -33,20 +33,15 @@ export const fetchCourses = async (
 };
 
 export const deleteCourse = async (id: string) => {
-  try {
-    const response = await fetch(`/api/admin/courses/${id}`, {
-      method: "DELETE",
-    });
-
-    const data = await response.json();
-    console.log(data);
-    return { data };
-  } catch (error) {
-    console.error(error);
-    return {
-      error: "Something went wrong!",
-    };
+  const response = await fetch(`/api/admin/courses/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    throw new Error(errorResponse.error);
   }
+  const data = await response.json();
+  return data;
 };
 
 export const updateCourse = async (

@@ -5,7 +5,7 @@ import { courseSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 type Params = {
-  course_id: string;
+  id: string;
 };
 
 export async function DELETE(req: Request, { params }: { params: Params }) {
@@ -21,7 +21,7 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
       );
     }
 
-    const id = params.course_id;
+    const id = params.id;
     if (!id) {
       return NextResponse.json(
         { error: "Course ID is required" },
@@ -30,7 +30,10 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
     }
 
     const existingCourse = await prisma.course.findFirst({
-      where: { course_id: id },
+      where: { id },
+      include: {
+        Student: true,
+      },
     });
 
     if (!existingCourse) {
@@ -40,8 +43,18 @@ export async function DELETE(req: Request, { params }: { params: Params }) {
       );
     }
 
+    if (existingCourse.Student.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot delete the course. It is currently associated with students.",
+        },
+        { status: 400 }
+      );
+    }
+
     const course = await prisma.course.delete({
-      where: { course_id: id },
+      where: { id },
     });
 
     return NextResponse.json({
@@ -77,7 +90,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
         { status: 401 }
       );
     }
-    const id = params.course_id;
+    const id = params.id;
     if (!id) {
       return NextResponse.json(
         { error: "Course ID is required" },
@@ -88,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
     const { courseName, departmentId } = courseSchema.parse(requestPayload);
 
     const existingCourse = await prisma.course.findUnique({
-      where: { course_id: id },
+      where: { id },
     });
 
     if (!existingCourse) {
@@ -100,7 +113,7 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
 
     const updatedCourse = await prisma.course.update({
       where: {
-        course_id: id,
+        id,
       },
       data: {
         courseName,

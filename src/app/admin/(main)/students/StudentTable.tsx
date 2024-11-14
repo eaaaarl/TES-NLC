@@ -39,14 +39,22 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useDeleteStudent } from "./mutation";
 import { useToast } from "@/hooks/use-toast";
+import { Students } from "@/lib/types";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import { useRouter } from "next/navigation";
+import StudentTableLoadingSkeleton from "./StudentTableLoadingSkeleton";
+import EmptyState from "@/components/EmptyState";
 
 export default function StudentTable() {
+  const router = useRouter();
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [mounted, setMounted] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<Students | null>(null);
+  const [onOpenDelete, setOnOpenDelete] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
@@ -63,22 +71,39 @@ export default function StudentTable() {
   });
 
   const { mutate, status } = useDeleteStudent();
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this student?")) {
-      mutate(id, {
+
+  const handleOpenDeleteDialog = (student: Students) => {
+    setOnOpenDelete(true);
+    setStudentToDelete(student);
+  }
+
+  const handleDelete = () => {
+    if (studentToDelete) {
+      mutate(studentToDelete?.id, {
         onSuccess: () => {
           toast({
             description: "Student Deleted.",
           });
         },
       });
+
+      setOnOpenDelete(false);
+      setStudentToDelete(null);
     }
   };
-  if (!mounted) return null;
 
+
+  const handleEdit = (id: string) => {
+    router.push(`/admin/students/${id}/edit`)
+  }
+
+  if (!mounted) return null;
   const totalEntries = data?.meta.total || 0;
   const totalPages = data?.meta.pageCount || 0;
 
+  if (isLoading) {
+    return <StudentTableLoadingSkeleton rowCount={pageSize} />
+  }
   return (
     <>
       <div className="mb-4 flex justify-between items-center space-x-4">
@@ -86,7 +111,7 @@ export default function StudentTable() {
           value={String(pageSize)}
           onValueChange={(value) => {
             setPageSize(parseInt(value));
-            setPage(1); // Reset to the first page when pageSize changes
+            setPage(1);
           }}
         >
           <SelectTrigger className="w-18">
@@ -119,39 +144,14 @@ export default function StudentTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            Array.from({ length: pageSize }).map((_, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Skeleton className="h-9 w-full" />
-                    <Skeleton className="h-9 w-full" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : data?.data.length === 0 ? (
+          {data?.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-destructive">
-                No Students available.
+              <TableCell colSpan={7}>
+                <EmptyState
+                  iconClassName="w-8 h-8 text-gray-400 dark:text-blue-400"
+                  title="No students found"
+                  message="There are no students registered yet. Students added will appear here."
+                />
               </TableCell>
             </TableRow>
           ) : (
@@ -159,15 +159,38 @@ export default function StudentTable() {
               <TableRow key={student.studentID}>
                 <TableCell>{student.studentID}</TableCell>
                 <TableCell className="hidden lg:table-cell">
+                  <div className="flex items-center ">
+                    <div className="mr-3 border shadow-lg rounded-full overflow-hidden">
+                      {/* {student.avatarUrl ? (
+                        <Image
+                          alt={`Avatar_${student.id}`}
+                          src={student.avatarUrl}
+                          width={50}
+                          height={50}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <Image
+                          alt={`avatar`}
+                          src="/default-user.png"
+                          width={50}
+                          height={50}
+                          className="rounded-full"
+                        />
+                      )} */}
+                    </div>
+                    <div>
+                    </div>
+                  </div>
                   {student.firstname} {student.middlename} {student.lastname}
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                  {student.yearlevel}
+                  {student.section.yearLevel.yearName.toUpperCase()}
                 </TableCell>
                 <TableCell>
-                  {student.course.Department.departmentName}
+                  {student.course.department.departmentName}
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell>{student.section.sectionName}</TableCell>
                 <TableCell>
                   <Badge variant={"destructive"}>{student.status}</Badge>
                 </TableCell>
@@ -184,12 +207,12 @@ export default function StudentTable() {
                       <DropdownMenuItem>
                         <Eye className="mr-2 h-4 w-4" /> View
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(student.id)}>
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleDelete(String(student.id))}
+                        onClick={() => handleOpenDeleteDialog(student)}
                         className="text-red-600"
                         disabled={status === "pending"}
                       >
@@ -251,7 +274,7 @@ export default function StudentTable() {
                   <div className="mb-2 flex-row">
                     <div className="text-sm ">Department</div>
                     <div>
-                      {student.course.Department.departmentName.toUpperCase()}
+                      {student.course.department.departmentName.toUpperCase()}
                     </div>
                   </div>
                 </div>
@@ -275,7 +298,7 @@ export default function StudentTable() {
       </div>
 
       <div className="mt-4 flex justify-between items-center">
-        <div className="hidden md:block">
+        <div className="hidden md:block w-full">
           {isLoading ? (
             <Skeleton className="h-4 w-full" />
           ) : (
@@ -294,6 +317,8 @@ export default function StudentTable() {
           />
         </div>
       </div>
+
+      <ConfirmDeleteDialog itemName={studentToDelete?.studentID} onConfirm={handleDelete} onCancel={() => setOnOpenDelete(false)} isOpen={onOpenDelete} />
     </>
   );
 }

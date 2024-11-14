@@ -9,13 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CircleUser, Lock, LogOut, User } from "lucide-react";
-import { useSession } from "@/app/students/(main)/SessionProvider";
+import { CircleUserRound, Lock, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
 import ChangePassword from "./ChangePassword";
 import { useRouter } from "next/navigation";
 import { logout } from "@/app/(auth)/Logout";
+import { useQuery } from "@tanstack/react-query";
+import { getStudent } from "@/app/students/(main)/profile/action";
 
 export default function ProfileStudent() {
   const [pending, startTransition] = useTransition();
@@ -23,8 +24,12 @@ export default function ProfileStudent() {
   const openModal = () => setIsDialogOpen(true);
   const router = useRouter();
 
-  const { studentInfo, loading, error } = useSession();
-  if (error) return <div>Error: {error}</div>;
+  const { data: studentInfo, isLoading, isError } = useQuery({
+    queryKey: ["students"],
+    queryFn: getStudent,
+  });
+
+  if (isError) return <div>Error: {isError}</div>;
   const fullname = studentInfo?.firstname + " " + studentInfo?.lastname;
 
   const handleLogout = () => {
@@ -33,30 +38,33 @@ export default function ProfileStudent() {
       router.push("/");
     });
   };
-
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className="ml-3 rounded-full">
-            {studentInfo?.avatarUrl ? (
+          {isLoading ? (<Skeleton className="rounded-full h-10 w-10 shadow-lg border" />) : studentInfo?.avatarUrl ?
+            (<Button variant="outline" size="icon" className="ml-3 rounded-full h-10 w-10 shadow-lg border">
               <Image
                 src={studentInfo.avatarUrl}
                 alt="Avatar"
-                className="h-5 w-5 rounded-full"
+                className="rounded-full"
+                width={40}
+                height={40}
+                quality={75}
+                priority={false}
               />
+            </Button>
             ) : (
-              <CircleUser className="h-5 w-5" />
-            )}
-          </Button>
+              <CircleUserRound className="h-8 w-8" />)}
+
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel className="text-md">
-            {loading ? <Skeleton className="h-4 w-full" /> : fullname}
+            {isLoading ? <Skeleton className="h-4 w-full" /> : fullname}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push("/students/profile")}>
-            {loading ? (
+            {isLoading ? (
               <Skeleton className="h-4 w-full" />
             ) : (
               <>
@@ -65,7 +73,7 @@ export default function ProfileStudent() {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={openModal}>
-            {loading ? (
+            {isLoading ? (
               <Skeleton className="h-4 w-full" />
             ) : (
               <>
@@ -75,8 +83,14 @@ export default function ProfileStudent() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} disabled={pending}>
-            <LogOut className="mr-2" />
-            {pending ? "Please wait" : "Logout"}
+            {isLoading ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <>
+                <LogOut className="mr-2" />
+                {pending ? "Please wait" : "Logout"}
+              </>
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -13,16 +13,16 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { fetchSubject } from "./action";
-import { MoreHorizontal } from "lucide-react";
+import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
 import Pagination from "@/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -34,27 +34,28 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useDeleteSubject } from "./mutation";
-import { EditSubjectModalForm } from "./EditSubjectModalForm";
+import { Subject } from "@/lib/types";
+import SubjectModalForm from "./SubjectModalForm";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import LoadingTableSkeleton from "@/components/LoadingTableSkeleton";
 
-interface Subject {
-  subject_id: string;
-  subjectName: string;
-}
-
-interface Meta {
+export interface Meta {
   total: number;
   page: number;
   pageSize: number;
   pageCount: number;
 }
+
 export default function SubjectTable() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [openModal, setOpenModal] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedSubject, setSelectedSubejct] = useState<Subject | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [subjecToDelete, setSubjectToDelete] = useState<Subject | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -72,18 +73,31 @@ export default function SubjectTable() {
   const totalPages = data?.meta.pageCount ?? 1;
   const totalEntries = data?.meta.total ?? 0;
 
-  const { mutateAsync } = useDeleteSubject();
 
-  const handleDeleteSubject = async (subject_id: string) => {
-    if (confirm("Are you sure you want to delete this subject.")) {
-      await mutateAsync(subject_id);
-    }
-  };
-
-  const handleEditSubject = async (subject: Subject) => {
+  const handleOpenDelete = async (subject: Subject) => {
+    setSubjectToDelete(subject);
     setOpenModal(true);
-    setSelectedSubejct(subject);
   };
+
+  const handleOpenEditModal = async (subject: Subject) => {
+    setSelectedSubejct(subject);
+    setOpenEditDialog(true);
+  }
+
+  const { mutate, status } = useDeleteSubject();
+  const handleDelete = () => {
+    if (subjecToDelete) {
+      mutate(subjecToDelete.id, {
+        onSuccess: () => {
+          setOpenModal(false);
+        }
+      });
+    }
+  }
+
+  if (isLoading) {
+    return <LoadingTableSkeleton />
+  }
 
   if (!mounted) return null;
   return (
@@ -106,29 +120,29 @@ export default function SubjectTable() {
           placeholder="Search subjects..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-[180px]"
+          className="w-[180px] text-base"
         />
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Subject Code</TableHead>
             <TableHead>Subject Name</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            <LoadingSkeleton pageSize={pageSize} />
-          ) : data?.data.length === 0 ? (
+          {data?.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={2} className="text-center text-destructive">
+              <TableCell colSpan={3} className="text-center text-destructive">
                 No subject available.
               </TableCell>
             </TableRow>
           ) : (
             data?.data.map((subject: Subject) => (
-              <TableRow key={subject.subject_id}>
+              <TableRow key={subject.id}>
+                <TableCell>{subject.subject_code}</TableCell>
                 <TableCell>{subject.subjectName}</TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -140,15 +154,15 @@ export default function SubjectTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={() => handleEditSubject(subject)}
-                      >
-                        Edit
+                      <DropdownMenuItem>
+                        <Eye className="mr-2 h-4 w-4" /> View
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteSubject(subject.subject_id)}
-                      >
-                        Delete
+                      <DropdownMenuItem onClick={() => handleOpenEditModal(subject)}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleOpenDelete(subject)}>
+                        <Trash className="mr-2 h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -176,13 +190,19 @@ export default function SubjectTable() {
           isLoading={isLoading}
         />
       </div>
-      {selectedSubject && (
-        <EditSubjectModalForm
-          Subject={selectedSubject}
-          onOpen={openModal}
-          onClose={() => setOpenModal(false)}
-        />
-      )}
+
+      <SubjectModalForm
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        subject={selectedSubject}
+      />
+
+      <ConfirmDeleteDialog
+        itemName={subjecToDelete?.subject_code ?? ""}
+        onConfirm={handleDelete}
+        isOpen={openModal}
+        onCancel={() => setOpenModal(false)}
+      />
     </>
   );
 }

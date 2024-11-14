@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_URL_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_URL_NON_POOLING") // uses a direct connection
+  provider = "mysql"
+  url      = env("DATABASE_URL") // uses connection pooling
 }
 
 model User {
@@ -75,10 +74,13 @@ model Student {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   courseID String
-  course   Course @relation(fields: [courseID], references: [course_id])
+  course   Course @relation(fields: [courseID], references: [id])
 
   sectionId String
-  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  section   Section @relation(fields: [sectionId], references: [id])
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
 }
 
 enum EvaluationStatus {
@@ -98,28 +100,89 @@ model Faculty {
 }
 
 model Course {
-  course_id    String     @id @default(uuid())
+  id           String     @id @default(uuid())
   courseName   String
   departmentId String
-  Department   Department @relation(fields: [departmentId], references: [id])
-
-  Student Student[]
+  department   Department @relation(fields: [departmentId], references: [id])
+  Student      Student[]
 }
 
 model Department {
-  id             String   @id @default(uuid())
-  departmentName String
-  Course         Course[]
+  id                    String    @id @default(uuid())
+  departmentName        String
+  departmentDescription String?
+  Student               Student[]
+  Section               Section[]
+  Course                Course[]
 }
 
 model Subject {
-  id           String @id @default(uuid())
-  subject_code String
+  id           String  @id @default(uuid())
+  subject_code String?
   subjectName  String
 }
 
 model Section {
   id          String    @id @default(uuid())
-  sectionName String
-  Student     Student[]
+  sectionName String    @unique
+  yearLevelId String
+  yearLevel   YearLevel @relation(fields: [yearLevelId], references: [id])
+
+  Department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String
+
+  Student Student[]
+}
+
+model YearLevel {
+  id       String    @id @default(uuid())
+  yearName String
+  Section  Section[]
+}
+
+model AcademicYear {
+  id        String   @id @default(uuid())
+  semester  String
+  year      String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  questions Question[]
+
+  @@map("categories")
+}
+
+model Question {
+  id            String        @id @default(cuid())
+  question      String
+  description   String?
+  required      Boolean       @default(true)
+  allowComments Boolean       @default(false)
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+  ratingScale   RatingScale[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("questions")
+}
+
+model RatingScale {
+  id          String   @id @default(cuid())
+  rating      Int
+  description String
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([questionId, rating])
+  @@map("rating_scales")
 }

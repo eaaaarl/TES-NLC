@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
           },
         },
         include: {
-          Department: true,
+          department: true,
         },
-        orderBy: { course_id: "desc" },
+        orderBy: { id: "desc" },
         skip,
         take: pageSize,
       }),

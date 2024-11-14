@@ -28,6 +28,37 @@ async function main() {
     },
   });
 
+  await prisma.yearLevel.createMany({
+    data: [
+      { yearName: "1st year" },
+      { yearName: "2nd year" },
+      { yearName: "3rd year" },
+      { yearName: "4th year" },
+    ],
+  });
+
+  await prisma.department.createMany({
+    data: [
+      {
+        departmentName: "CITE",
+        departmentDescription: "College of Information Technology Education",
+      },
+      {
+        departmentName: "CBM",
+        departmentDescription: "College of Business and Management",
+      },
+      {
+        departmentName: "CFAAS",
+        departmentDescription:
+          "College of Forestry, Agriculture and Aquatic Science",
+      },
+      {
+        departmentName: "CTE",
+        departmentDescription: "College of Teacher Education",
+      },
+    ],
+  });
+
   console.log("Seed admin created", { newUser, newAdministrator });
 }
 

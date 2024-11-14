@@ -4,7 +4,7 @@ import Sidebar from "@/components/students/Sidebar";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import React from "react";
-import { SessionProvider } from "./SessionProvider";
+import SessionProvider from "./SessionProvider";
 
 export const metadata: Metadata = {
   title: "TES-NLC",
@@ -16,7 +16,7 @@ export default async function layout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = await validateRequest();
+  const { user, session } = await validateRequest();
   if (!user) {
     redirect("/not-found");
   }
@@ -24,7 +24,7 @@ export default async function layout({
     return redirect("/unauthorized");
   }
   return (
-    <SessionProvider>
+    <SessionProvider value={{ user, session }}>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <Sidebar />
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">

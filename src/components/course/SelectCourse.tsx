@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Select,
@@ -11,36 +9,47 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { FormControl, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton from shadcn
+import { Skeleton } from "@/components/ui/skeleton";
 import { Course } from "@/lib/types";
 import ky from "ky";
 
 interface SelectCourseProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  field: any;
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+    name: string;
+  };
+  onCourseChange: (courseId: string) => void;
 }
 
-export default function SelectCourse({ field }: SelectCourseProps) {
+export default function SelectCourse({
+  field,
+  onCourseChange,
+}: SelectCourseProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["courses"],
     queryFn: () => ky.get(`/api/admin/courses/all-course`).json<Course[]>(),
-    staleTime: 60000,
+    staleTime: 10000,
   });
+
+  const handleChange = (value: string) => {
+    field.onChange(value);
+    onCourseChange(value);
+  };
 
   return (
     <FormItem>
       <FormLabel>Degree Program</FormLabel>
       <FormControl>
         <Select
-          onValueChange={(value) => field.onChange(value)}
-          defaultValue={field.value}
+          value={field.value || ""}
+          onValueChange={handleChange}
         >
           <SelectTrigger className="mt-1 w-full">
-            <SelectValue placeholder="Select Degree Program" />
+            <SelectValue placeholder="Select Course" />
           </SelectTrigger>
-
           <SelectContent>
-            <SelectGroup className="overflow-x-auto w-full">
+            <SelectGroup>
               {isLoading ? (
                 <>
                   <div className="p-2">
@@ -55,7 +64,7 @@ export default function SelectCourse({ field }: SelectCourseProps) {
                 </>
               ) : (
                 data?.map((course) => (
-                  <SelectItem key={course.course_id} value={course.course_id}>
+                  <SelectItem key={course.id} value={course.id}>
                     {course.courseName}
                   </SelectItem>
                 ))

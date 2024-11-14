@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -19,7 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import InputFields from "@/components/InputFields";
-import SelectFields from "@/components/SelectFields";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
@@ -27,10 +26,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSignUp } from "./mutation";
+import { Input } from "@/components/ui/input";
+
+import { Department } from "@/lib/types";
+import { getDepartmentByCourse } from "./action";
+import SelectSections from "@/components/sections/SelectSections";
+import SelectYearLevel from "@/components/sections/SelectYearLevel";
 
 export default function SignUpForm() {
+  const { toast } = useToast();
   const router = useRouter();
   const [error, setError] = useState<string>();
+  const [yearlevelId, setYearLevelId] = useState("");
+  const [departments, setDepartments] = useState<Department | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
 
   const form = useForm<StudentValues>({
     resolver: zodResolver(studentSchema),
@@ -40,7 +49,9 @@ export default function SignUpForm() {
       lastname: "",
       studentID: "",
       yearlevel: "",
-      degreeProgram: "",
+      sectionId: "",
+      departmentId: "",
+      courseId: "",
       email: "",
       contact_no: "",
       birthdate: "",
@@ -54,9 +65,21 @@ export default function SignUpForm() {
       confirm_password: "",
     },
   });
-
-  const { toast } = useToast();
   const { reset } = form;
+
+  useEffect(() => {
+    const getDepartment = async () => {
+      if (selectedCourseId) {
+        const result = await getDepartmentByCourse(selectedCourseId);
+        setDepartments(result);
+        if (result && result.id) {
+          form.setValue("departmentId", result.id);
+        }
+      }
+    };
+    getDepartment();
+  }, [selectedCourseId, form]);
+
   const { mutate, status } = useSignUp();
   const signup = async (payload: StudentValues) => {
     setError(undefined);
@@ -78,6 +101,10 @@ export default function SignUpForm() {
     });
   };
 
+  const handleYearLevelChange = (yearLevelId: string) => {
+    setYearLevelId(yearLevelId);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(signup)} className="space-y-6">
@@ -94,27 +121,24 @@ export default function SignUpForm() {
               <InputFields
                 label="First name"
                 name="firstname"
-                placeHolder="First Name"
                 control={form.control}
-                className="mt-1 w-full"
+                className="mt-1 w-full text-base"
               />
             </div>
             <div className="flex-1">
               <InputFields
                 label="Middle name"
                 name="middlename"
-                placeHolder="Middle Name"
                 control={form.control}
-                className="mt-1 w-full"
+                className="mt-1 w-full text-base"
               />
             </div>
             <div className="flex-1">
               <InputFields
                 label="Last name"
                 name="lastname"
-                placeHolder="Last Name"
                 control={form.control}
-                className="mt-1 w-full"
+                className="mt-1 w-full text-base"
               />
             </div>
           </div>
@@ -149,35 +173,77 @@ export default function SignUpForm() {
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <InputFields
-              name="studentID"
-              label="Student ID"
+        <InputFields
+          name="studentID"
+          label="Student ID"
+          control={form.control}
+          className="mt-1 w-full text-base"
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <FormField
               control={form.control}
-              className="mt-1 w-full"
+              name="courseId"
+              render={({ field }) => (
+                <SelectCourse
+                  field={field}
+                  onCourseChange={setSelectedCourseId}
+                />
+              )}
             />
           </div>
-          <div className="flex-1">
-            <SelectFields
+          <div>
+            <FormItem>
+              <FormLabel>Department</FormLabel>
+              <Input value={departments?.departmentName ?? ""} className="bg-gray-300" readOnly />
+            </FormItem>
+            <FormField
               control={form.control}
-              name="yearlevel"
-              label="Year Level"
-              options={[
-                { label: "1st Year", value: "1st Year" },
-                { label: "2nd Year", value: "2nd Year" },
-                { label: "3rd Year", value: "3rd Year" },
-                { label: "4th Year", value: "4th Year" },
-              ]}
+              name="departmentId"
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  value={departments ? departments.id : ""}
+                  type="hidden"
+                />
+              )}
             />
           </div>
         </div>
 
-        <FormField
-          control={form.control}
-          name="degreeProgram"
-          render={({ field }) => <SelectCourse field={field} />}
-        />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <FormField
+              control={form.control}
+              name="yearlevel"
+              render={({ field }) => (
+                <SelectYearLevel
+                  onYearLevelChange={handleYearLevelChange}
+                  field={field}
+                />
+              )}
+            />
+          </div>
+
+          <div className="flex-1">
+            <FormField
+              control={form.control}
+              name="sectionId"
+              render={({ field }) => (
+                <SelectSections
+                  field={field}
+                  departmentId={departments?.id || ""}
+                  yearLevelId={yearlevelId ?? ""}
+                  disabled={!yearlevelId || !departments}
+                  onSectionChange={(sectionId) => {
+                    sectionId;
+                  }}
+                />
+              )}
+            />
+          </div>
+        </div>
 
         <div>
           <InputFields
@@ -185,16 +251,17 @@ export default function SignUpForm() {
             label="Email"
             types="email"
             control={form.control}
-            className="mt-1 w-full"
+            className="mt-1 w-full text-base"
           />
         </div>
 
         <div>
           <InputFields
             name="contact_no"
-            label="Contact No"
+            label="Mobile Phone"
+            placeHolder="09XXXXXXXXX"
             control={form.control}
-            className="mt-1 w-full"
+            className="mt-1 w-full text-base"
           />
         </div>
 
@@ -224,7 +291,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <PasswordInput {...field} />
+                    <PasswordInput className="text-base" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,7 +306,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <PasswordInput {...field} />
+                    <PasswordInput className="text-base" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -248,11 +315,7 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        <Button
-          type="submit"
-          disabled={true}
-          className="w-full bg-blue-900 hover:bg-blue-800"
-        >
+        <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
           {status === "pending" ? (
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="animate-spin h-4 w-4" />

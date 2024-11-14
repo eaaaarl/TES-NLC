@@ -1,27 +1,25 @@
+"use client"
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
-import React from "react";
-import CreateSubjectModalForm from "./CreateSubjectModalForm";
+import React, { useState } from "react";
 import SubjectTable from "./SubjectTable";
-import { Metadata } from "next";
+import SubjectModalForm from "./SubjectModalForm";
+import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "TES-NLC | SUBJECTS",
-  description:
-    "The Teacher Faculty Evaluation System for the North Eastern Mindanao State University, Lianga Campus (NEMSU LC)",
-};
 export default function SubjectsPage() {
+  const [onOpen, setOnOpen] = useState<boolean>(false);
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="justify-between items-center flex">
         <h1 className="text-lg font-semibold md:text-2xl">
           {"List of Subject's"}
         </h1>
-        <CreateSubjectModalForm />
+        <Button onClick={() => setOnOpen(true)}>Create Subject</Button>
       </div>
       <Card>
         <CardHeader>
@@ -31,6 +29,10 @@ export default function SubjectsPage() {
           <SubjectTable />
         </CardContent>
       </Card>
+
+      <SubjectModalForm
+        open={onOpen}
+        onClose={() => setOnOpen(false)} />
     </main>
   );
 }

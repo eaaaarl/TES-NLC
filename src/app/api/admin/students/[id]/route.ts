@@ -2,6 +2,66 @@ import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { user } = await validateRequest();
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized!",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+    const id = params.id;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          error: "Id is required!",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const existingStudent = await prisma.student.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        user: true,
+        course: true,
+        department: true,
+        section: {
+          include: {
+            yearLevel: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(existingStudent);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }

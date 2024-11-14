@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormControl, FormItem, FormLabel } from "../ui/form";
+import { FormControl, FormItem, FormLabel, FormMessage } from "../ui/form";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,16 @@ interface Department {
   departmentName: string;
 }
 
-export default function SelectDepartment({ field }: { field: any }) {
+interface SelectDepartmentProps {
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+    name: string;
+  }
+}
+export default function SelectDepartment({
+  field,
+}: SelectDepartmentProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +55,7 @@ export default function SelectDepartment({ field }: { field: any }) {
       <FormControl>
         <Select
           onValueChange={(value) => field.onChange(value)}
-          defaultValue={field.value}
-          disabled={loading}
+          value={field.value}
         >
           <SelectTrigger className="mt-1 w-full">
             <SelectValue placeholder="Select Department" />
@@ -81,6 +89,7 @@ export default function SelectDepartment({ field }: { field: any }) {
           </SelectContent>
         </Select>
       </FormControl>
+      <FormMessage />
     </FormItem>
   );
 }

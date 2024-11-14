@@ -47,7 +47,7 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
   useEffect(() => {
     form.reset({
       courseName: course.courseName,
-      departmentId: course.Department.id,
+      departmentId: course.department.id,
     });
   }, [form, course]);
 
@@ -56,7 +56,7 @@ export function EditModalForm({ course, onOpen, onClose }: EditModalFormProps) {
   const HandleUpdateCourse = (values: CourseValues) => {
     setError(undefined);
     mutate(
-      { id: course.course_id, values },
+      { id: course.id, values },
       {
         onSuccess: () => {
           toast({

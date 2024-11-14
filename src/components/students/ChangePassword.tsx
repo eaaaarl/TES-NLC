@@ -24,9 +24,9 @@ import {
 import { PasswordInput } from "../PasswordInput";
 import { Button } from "../ui/button";
 import { changePassword } from "./action";
-import { useSession } from "@/app/students/(main)/SessionProvider";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useSession } from "@/app/students/(main)/SessionProvider";
 
 interface ChangePasswordProps {
   onOpen: boolean;
@@ -37,8 +37,8 @@ export default function ChangePassword({
   onOpen,
   onOpenChange,
 }: ChangePasswordProps) {
+  const { user } = useSession();
   const { toast } = useToast();
-  const { studentInfo } = useSession();
   const [isPending, startTransition] = useTransition();
   /*   const [error, setError] = useState<string>();
    */ const form = useForm({
@@ -52,24 +52,24 @@ export default function ChangePassword({
   const handleChangePassword = (payload: ChangePasswordValues) => {
     /*     setError(undefined);
      */ startTransition(async () => {
-      const { success, error } = await changePassword(
-        String(studentInfo?.user.id),
-        payload
-      );
-      if (success) {
-        toast({
-          description: "Password Changed!",
-        });
-        form.reset();
-        onOpenChange(false);
-      } else {
-        toast({
-          title: "Try Again",
-          description: error,
-          variant: "destructive",
-        });
-      }
-    });
+    const { success, error } = await changePassword(
+      String(user.id),
+      payload
+    );
+    if (success) {
+      toast({
+        description: "Password Changed!",
+      });
+      form.reset();
+      onOpenChange(false);
+    } else {
+      toast({
+        title: "Try Again",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  });
   };
 
   return (

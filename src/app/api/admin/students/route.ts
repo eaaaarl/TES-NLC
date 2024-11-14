@@ -44,7 +44,12 @@ export async function GET(req: NextRequest) {
       include: {
         course: {
           include: {
-            Department: true,
+            department: true,
+          },
+        },
+        section: {
+          include: {
+            yearLevel: true,
           },
         },
       },

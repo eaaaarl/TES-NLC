@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import {
   Card,
   CardContent,
@@ -10,7 +11,8 @@ import SectionModalForm from "./SectionModalForm";
 import { Button } from "@/components/ui/button";
 import SectionTable from "./SectionTable";
 
-export default function page() {
+
+export default function SectionPage() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
