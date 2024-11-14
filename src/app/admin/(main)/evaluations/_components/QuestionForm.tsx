@@ -24,13 +24,13 @@ interface QuestionFormProps {
     onClose?: () => void;
 }
 
-const defaultRatingScale = {
-    '1': 'POOR',
-    '2': 'FAIR',
-    '3': 'SATISFACTORY',
-    '4': 'VERY SATISFACTORY',
-    '5': 'OUTSTANDING',
-};
+export const defaultRatingScale = [
+    { id: '1', rating: 1, description: 'POOR' },
+    { id: '2', rating: 2, description: 'FAIR' },
+    { id: '3', rating: 3, description: 'SATISFACTORY' },
+    { id: '4', rating: 4, description: 'VERY SATISFACTORY' },
+    { id: '5', rating: 5, description: 'OUTSTANDING' },
+];
 
 export default function QuestionForm({ question, onClose }: QuestionFormProps) {
     const { toast } = useToast()
@@ -75,7 +75,7 @@ export default function QuestionForm({ question, onClose }: QuestionFormProps) {
                 description: '',
                 required: true,
                 allowComments: false,
-                ratingScale: undefined
+                ratingScale: defaultRatingScale
             })
         }
     }, [question, form])
@@ -241,9 +241,12 @@ function QuestionSettings({ control }: QuestionSettingsProps) {
         control
     });
 
-    const handleRatingScaleChange = (rating: string, description: string) => {
-        const currentScale = ratingScaleField.value ?? defaultRatingScale;
-        const updatedScale = { ...currentScale, [rating]: description };
+    const handleRatingScaleChange = (index: number, description: string) => {
+        const updatedScale = [...ratingScaleField.value];
+        updatedScale[index] = {
+            ...updatedScale[index],
+            description
+        };
         ratingScaleField.onChange(updatedScale);
     };
 
@@ -304,16 +307,16 @@ function QuestionSettings({ control }: QuestionSettingsProps) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {Object.entries(ratingScaleField.value ?? defaultRatingScale).map(([rating, value]) => (
-                                    <TableRow key={rating}>
-                                        <TableCell className="font-medium">{rating}</TableCell>
+                                {ratingScaleField.value.map((scale, index) => (
+                                    <TableRow key={scale.id}>
+                                        <TableCell className="font-medium">{scale.rating}</TableCell>
                                         <TableCell>
                                             <Input
-                                                value={value}
+                                                value={scale.description}
                                                 onChange={(e) =>
-                                                    handleRatingScaleChange(rating, e.target.value)
+                                                    handleRatingScaleChange(index, e.target.value)
                                                 }
-                                                placeholder={`Description for rating ${rating}`}
+                                                placeholder={`Description for rating ${scale.rating}`}
                                             />
                                         </TableCell>
                                     </TableRow>

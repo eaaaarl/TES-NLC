@@ -34,9 +34,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Prisma
-prisma/schema.prisma
-prisma/migrations/
-prisma/seedAdministrator.ts
-prisma/seedCourse.js
-*.db

@@ -1,3 +1,4 @@
+import { defaultRatingScale } from "@/app/admin/(main)/evaluations/_components/QuestionForm";
 import { z } from "zod";
 
 const requiredString = z.string().trim().min(1, "Required");
@@ -196,7 +197,15 @@ export const QuestionSchema = z.object({
   description: z.string().optional(),
   required: z.boolean().default(true),
   allowComments: z.boolean().default(true),
-  ratingScale: z.record(z.string(), z.string()).optional(),
+  ratingScale: z
+    .array(
+      z.object({
+        id: z.string(),
+        rating: z.number(),
+        description: z.string(),
+      })
+    )
+    .default(defaultRatingScale),
 });
 
 export type questionValues = z.infer<typeof QuestionSchema>;
