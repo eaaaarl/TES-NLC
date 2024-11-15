@@ -3,15 +3,14 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { Eye, Trash2, Edit2 } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CategoryForm from './_components/CategoryForm';
 import CategoryTable from './_components/CategoryTable';
 import { Category, Question } from '@/lib/types';
 import QuestionForm from './_components/QuestionForm';
 import QuestionTable from './_components/QuestionTable';
+import TableViewQuestion from './_components/TableViewQuestion';
 
 export default function EvaluationQuestionForm() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -98,43 +97,7 @@ export default function EvaluationQuestionForm() {
                                     </TabsContent>
 
                                     <TabsContent value="table">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="w-[400px]">DESCRIPTIONS</TableHead>
-                                                    <TableHead className="text-center">OUTSTANDING</TableHead>
-                                                    <TableHead className="text-center">VERY <br />SATISFACTORY </TableHead>
-                                                    <TableHead className="text-center">SATISFACTORY</TableHead>
-                                                    <TableHead className="text-center">FAIR</TableHead>
-                                                    <TableHead className="text-center">POOR</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {/* {questions.map((q) => (
-                                                    <TableRow key={q.id}>
-                                                        <TableCell className="align-middle">{q.question}</TableCell>
-                                                        {['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree'].map((rating) => (
-                                                            <TableCell key={rating} className="text-center">
-                                                                <div className="flex justify-center">
-                                                                    <div className="h-4 w-4 rounded-full border border-gray-300">
-                                                                        <div className="h-full w-full rounded-full" />
-                                                                    </div>
-                                                                </div>
-                                                            </TableCell>
-                                                        ))}
-                                                    </TableRow>
-                                                ))} */}
-                                            </TableBody>
-                                        </Table>
-
-                                        <div className="mt-6">
-                                            <label className="text-sm font-medium">Comments</label>
-                                            <Textarea
-                                                placeholder="Enter your comments here"
-                                                className="mt-2"
-                                                rows={4}
-                                            />
-                                        </div>
+                                        <TableViewQuestion />
                                     </TabsContent>
                                 </Tabs>
                             </CardContent>
