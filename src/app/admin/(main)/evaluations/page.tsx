@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import CategoryForm from './_components/CategoryForm';
 import CategoryTable from './_components/CategoryTable';
 import { Category, Question } from '@/lib/types';
@@ -15,6 +21,8 @@ import TableViewQuestion from './_components/TableViewQuestion';
 export default function EvaluationQuestionForm() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+    const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+
     const handleEditCategory = (category: Category) => {
         setSelectedCategory(category);
     };
@@ -24,12 +32,12 @@ export default function EvaluationQuestionForm() {
     };
 
     const handleEditQuestion = (question: Question) => {
-        setSelectedQuestion(question)
-    }
+        setSelectedQuestion(question);
+    };
 
     const handleCloseEditQuestion = () => {
         setSelectedQuestion(null);
-    }
+    };
 
     return (
         <div className="flex flex-1 flex-col p-4 lg:gap-6 lg:p-6">
@@ -44,8 +52,16 @@ export default function EvaluationQuestionForm() {
                 </div>
             </div>
 
-            <Tabs defaultValue="categories" className="w-full">
+            <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className='text-lg mb-3'>Question Preview</DialogTitle>
+                    </DialogHeader>
+                    <TableViewQuestion />
+                </DialogContent>
+            </Dialog>
 
+            <Tabs defaultValue="categories" className="w-full">
                 <TabsList className="w-auto mb-4">
                     <TabsTrigger value="categories" className="px-8">Categories</TabsTrigger>
                     <TabsTrigger value="questions" className="px-8">Questions</TabsTrigger>
@@ -68,7 +84,6 @@ export default function EvaluationQuestionForm() {
                             </CardContent>
                         </Card>
                     </div>
-
                 </TabsContent>
 
                 <TabsContent value="questions">
@@ -79,8 +94,12 @@ export default function EvaluationQuestionForm() {
                         />
                         <Card className='col-span-2'>
                             <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle>Question Prseview</CardTitle>
-                                <Button variant="outline" size="sm">
+                                <CardTitle>Question Preview</CardTitle>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowPreviewDialog(true)}
+                                >
                                     <Eye className="mr-2 h-4 w-4" />
                                     Preview All
                                 </Button>
@@ -91,11 +110,9 @@ export default function EvaluationQuestionForm() {
                                         <TabsTrigger value="detailed">Detailed View</TabsTrigger>
                                         <TabsTrigger value="table">Table View</TabsTrigger>
                                     </TabsList>
-
                                     <TabsContent value="detailed">
                                         <QuestionTable onEdit={handleEditQuestion} />
                                     </TabsContent>
-
                                     <TabsContent value="table">
                                         <TableViewQuestion />
                                     </TabsContent>
@@ -108,4 +125,3 @@ export default function EvaluationQuestionForm() {
         </div>
     );
 }
-

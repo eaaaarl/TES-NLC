@@ -5,41 +5,41 @@ async function main() {
     data: [
       {
         courseName: "Bachelor of Science in Computer Science",
-        departmentId: "c8d332af-137c-4821-ac2a-8f653b7da184",
+        departmentId: "f1773c35-00d9-490f-a5c2-fdf4fa7426ec",
       },
       {
         courseName: "Bachelor of Science in Fisheries",
-        departmentId: "ce542f71-65ee-4897-be20-2f8485571f58",
+        departmentId: "ab8830f0-cf9f-42a0-8fb3-0c4078dce8e5",
       },
       {
         courseName: "Bachelor of Science in Marine Biology",
-        departmentId: "ce542f71-65ee-4897-be20-2f8485571f58",
+        departmentId: "ab8830f0-cf9f-42a0-8fb3-0c4078dce8e5",
       },
       {
         courseName: "Bachelor of Science in Environmental Science",
-        departmentId: "ce542f71-65ee-4897-be20-2f8485571f58",
+        departmentId: "ab8830f0-cf9f-42a0-8fb3-0c4078dce8e5",
       },
       {
         courseName: "Bachelor of Elementary Education",
-        departmentId: "1bee8aef-289d-4ae8-bd81-ed5ea7ce6f86",
+        departmentId: "fe4ce804-bc2c-41b0-aa48-e8e1726c93ff",
       },
       {
         courseName: "Bachelor of Secondary Education",
-        departmentId: "1bee8aef-289d-4ae8-bd81-ed5ea7ce6f86",
+        departmentId: "fe4ce804-bc2c-41b0-aa48-e8e1726c93ff",
       },
       {
         courseName:
           "Bachelor of Science in Business Administration Major: Financial Management ",
-        departmentId: "d750db38-3016-4231-80a7-14952ed1e515",
+        departmentId: "b7c45501-9266-42f2-8d04-6a577eb3d1d4",
       },
       {
         courseName:
           "Bachelor of Science in Business Administration Major: Business Economics ",
-        departmentId: "d750db38-3016-4231-80a7-14952ed1e515",
+        departmentId: "b7c45501-9266-42f2-8d04-6a577eb3d1d4",
       },
       {
         courseName: "Bachelor of Science in Hospitality Management",
-        departmentId: "d750db38-3016-4231-80a7-14952ed1e515",
+        departmentId: "b7c45501-9266-42f2-8d04-6a577eb3d1d4",
       },
     ],
   });

@@ -19,24 +19,24 @@ export default function Header() {
   const pathname = usePathname();
 
   const breadcrumbMap: Record<string, { icon: React.ReactNode; name: string }> =
-    {
-      "/students/dashboard": {
-        icon: <Home className="h-6 w-6" />,
-        name: "Dashboard",
-      },
-      "/students/evaluation": {
-        icon: <Clipboard className="h-6 w-6" />,
-        name: "Evaluation",
-      },
-      "/students/setting": {
-        icon: <Settings className="h-6 w-6" />,
-        name: "Setting",
-      },
-      "/students/profile": {
-        icon: <User className="h-6 w-6" />,
-        name: "Profile",
-      },
-    };
+  {
+    "/students/dashboard": {
+      icon: <Home className="h-6 w-6" />,
+      name: "Dashboard",
+    },
+    "/students/evaluation": {
+      icon: <Clipboard className="h-6 w-6" />,
+      name: "Evaluation",
+    },
+    "/students/setting": {
+      icon: <Settings className="h-6 w-6" />,
+      name: "Setting",
+    },
+    "/students/profile": {
+      icon: <User className="h-6 w-6" />,
+      name: "Profile",
+    },
+  };
 
   const breadcrumb = breadcrumbMap[pathname] || {
     icon: <Home className="h-6 w-6" />,
@@ -72,33 +72,30 @@ export default function Header() {
             </Link>
             <Link
               href="/students/dashboard"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                pathname === "/students/dashboard"
-                  ? "bg-muted text-primary"
-                  : "text-muted-foreground"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/students/dashboard"
+                ? "bg-muted text-primary"
+                : "text-muted-foreground"
+                }`}
             >
               <Home className="h-5 w-5" />
               Dashboard
             </Link>
             <Link
               href="/students/evaluation"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                pathname === "/students/evaluation"
-                  ? "bg-muted text-primary"
-                  : "text-muted-foreground"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/students/evaluation"
+                ? "bg-muted text-primary"
+                : "text-muted-foreground"
+                }`}
             >
               <Clipboard className="h-5 w-5" />
               Evaluation
             </Link>
             <Link
               href="#"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                pathname === "/students/setting"
-                  ? "bg-muted text-primary"
-                  : "text-muted-foreground"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/students/setting"
+                ? "bg-muted text-primary"
+                : "text-muted-foreground"
+                }`}
             >
               <Settings className="h-5 w-5" />
               Setting

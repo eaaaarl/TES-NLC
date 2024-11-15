@@ -79,8 +79,10 @@ model Student {
   sectionId String
   section   Section @relation(fields: [sectionId], references: [id])
 
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId         String
+  department           Department             @relation(fields: [departmentId], references: [id])
+  StudentSubjectAssign StudentSubjectAssign[]
+  Evaluation           Evaluation[]
 }
 
 enum EvaluationStatus {
@@ -117,9 +119,11 @@ model Department {
 }
 
 model Subject {
-  id           String  @id @default(uuid())
-  subject_code String?
-  subjectName  String
+  id                   String                 @id @default(uuid())
+  subject_code         String?
+  subjectName          String
+  StudentSubjectAssign StudentSubjectAssign[]
+  Evaluation           Evaluation[]
 }
 
 model Section {
@@ -185,4 +189,32 @@ model RatingScale {
 
   @@unique([questionId, rating])
   @@map("rating_scales")
+}
+
+model StudentSubjectAssign {
+  id        String  @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, subjectId])
+}
+
+model Evaluation {
+  id        String   @id @default(uuid())
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  subjectId String
+  responses Json
+  status    String   @default("pending") // pending, completed
+  deadline  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, subjectId])
 }
