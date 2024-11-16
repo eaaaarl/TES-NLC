@@ -269,7 +269,7 @@ export default function StudentTable() {
                 <div className="flex justify-between items-center">
                   <div className="mb-2 flex-row">
                     <div className="text-sm">Year Level</div>
-                    <div>{student.yearlevel.toUpperCase()}</div>
+                    <div>{student.yearLevelId.toUpperCase()}</div>
                   </div>
                   <div className="mb-2 flex-row">
                     <div className="text-sm ">Department</div>

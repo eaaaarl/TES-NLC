@@ -13,7 +13,7 @@ export interface Students {
       departmentName: string;
     };
   };
-  yearlevel: string;
+  yearLevelId: string;
   section: {
     id: string;
     sectionName: string;

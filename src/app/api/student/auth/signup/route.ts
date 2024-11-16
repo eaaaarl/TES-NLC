@@ -73,7 +73,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         middlename,
         lastname,
         gender,
-        yearlevel,
+        yearLevelId: yearlevel,
         contact_no,
         birthdate,
         streetAddress,

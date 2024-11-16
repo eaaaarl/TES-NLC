@@ -209,3 +209,19 @@ export const QuestionSchema = z.object({
 });
 
 export type questionValues = z.infer<typeof QuestionSchema>;
+
+export const StudentAssignSectionYearLevelSubject = z.object({
+  yearLevelId: requiredString,
+  sectionId: requiredString,
+  subjectIds: z
+    .array(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .min(1, "Please select at least one subject"),
+});
+
+export type studentAssignSectionYearLevelSubjectValues = z.infer<
+  typeof StudentAssignSectionYearLevelSubject
+>;

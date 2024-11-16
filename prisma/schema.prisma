@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL") // uses connection pooling
 }
 
+model RegistrationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  used      Boolean  @default(false)
+  role      Role
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  createdBy String
+}
+
 model User {
   id        String    @id @default(uuid())
   email     String?   @unique
@@ -55,7 +65,6 @@ model Student {
   middlename String?
   email      String?          @unique
   gender     String
-  yearlevel  String
   contact_no String?
   status     EvaluationStatus @default(PENDING)
   avatarUrl  String?
@@ -79,8 +88,12 @@ model Student {
   sectionId String
   section   Section @relation(fields: [sectionId], references: [id])
 
-  departmentId         String
-  department           Department             @relation(fields: [departmentId], references: [id])
+  yearLevelId String
+  yearLevel   YearLevel @relation(fields: [yearLevelId], references: [id])
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
   StudentSubjectAssign StudentSubjectAssign[]
   Evaluation           Evaluation[]
 }
@@ -89,16 +102,6 @@ enum EvaluationStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-model Faculty {
-  id        String  @id @default(uuid())
-  avatarUrl String?
-  facultyID String  @unique
-  fullname  String
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Course {
@@ -116,24 +119,32 @@ model Department {
   Student               Student[]
   Section               Section[]
   Course                Course[]
+  Faculty               Faculty[]
+  Subject               Subject[]
 }
 
 model Subject {
-  id                   String                 @id @default(uuid())
-  subject_code         String?
-  subjectName          String
+  id           String     @id @default(uuid())
+  subject_code String?
+  subjectName  String
+  yearLevelId  String
+  yearLevel    YearLevel  @relation(fields: [yearLevelId], references: [id])
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
   StudentSubjectAssign StudentSubjectAssign[]
   Evaluation           Evaluation[]
+  FacultySubjectAssign FacultySubjectAssign[]
 }
 
 model Section {
-  id          String    @id @default(uuid())
-  sectionName String    @unique
-  yearLevelId String
-  yearLevel   YearLevel @relation(fields: [yearLevelId], references: [id])
+  id          String @id @default(uuid())
+  sectionName String @unique
 
-  Department   Department @relation(fields: [departmentId], references: [id])
+  yearLevelId  String
+  yearLevel    YearLevel  @relation(fields: [yearLevelId], references: [id])
   departmentId String
+  Department   Department @relation(fields: [departmentId], references: [id])
 
   Student Student[]
 }
@@ -142,19 +153,25 @@ model YearLevel {
   id       String    @id @default(uuid())
   yearName String
   Section  Section[]
+  Student  Student[]
+  Subject  Subject[]
 }
 
 model AcademicYear {
-  id        String   @id @default(uuid())
-  semester  String
-  year      String
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  id                   String                 @id @default(uuid())
+  semester             String
+  year                 String
+  isActive             Boolean                @default(false)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt()
+  FacultySubjectAssign FacultySubjectAssign[]
+  Evaluation           Evaluation[]
+  FacultyEvaluation    FacultyEvaluation[]
+  StudentSubjectAssign StudentSubjectAssign[]
 }
 
 model Category {
-  id        String     @id @default(cuid())
+  id        String     @id @default(uuid())
   name      String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -164,7 +181,7 @@ model Category {
 }
 
 model Question {
-  id            String        @id @default(cuid())
+  id            String        @id @default(uuid())
   question      String
   description   String?
   required      Boolean       @default(true)
@@ -179,7 +196,7 @@ model Question {
 }
 
 model RatingScale {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   rating      Int
   description String
   questionId  String
@@ -192,29 +209,92 @@ model RatingScale {
 }
 
 model StudentSubjectAssign {
-  id        String  @id @default(uuid())
-  studentId String
-  student   Student @relation(fields: [studentId], references: [id])
-  subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id])
+  id             String       @id @default(uuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id])
+  subjectId      String
+  subject        Subject      @relation(fields: [subjectId], references: [id])
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([studentId, subjectId])
+  @@unique([studentId, subjectId, academicYearId])
 }
 
 model Evaluation {
   id        String   @id @default(uuid())
-  student   Student  @relation(fields: [studentId], references: [id])
   studentId String
-  subject   Subject  @relation(fields: [subjectId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id])
   subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  facultyId String
+  faculty   Faculty  @relation(fields: [facultyId], references: [id])
   responses Json
   status    String   @default("pending") // pending, completed
   deadline  DateTime
+
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([studentId, subjectId])
+  @@unique([studentId, subjectId, facultyId, academicYearId])
+}
+
+model Faculty {
+  id                String  @id @default(uuid())
+  avatarUrl         String?
+  facultyID         String  @unique
+  firstname         String
+  middlename        String?
+  lastname          String
+  profileVisibility Boolean @default(true)
+  phoneNumber       String?
+  position          String?
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  FacultySubjectAssign FacultySubjectAssign[]
+  Evaluation           Evaluation[]
+  FacultyEvaluation    FacultyEvaluation[]
+}
+
+model FacultySubjectAssign {
+  id             String       @id @default(uuid())
+  facultyId      String
+  faculty        Faculty      @relation(fields: [facultyId], references: [id])
+  subjectId      String
+  subject        Subject      @relation(fields: [subjectId], references: [id])
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([facultyId, subjectId, academicYearId])
+}
+
+model FacultyEvaluation {
+  id               String       @id @default(uuid())
+  facultyId        String
+  faculty          Faculty      @relation(fields: [facultyId], references: [id])
+  academicYearId   String
+  academicYear     AcademicYear @relation(fields: [academicYearId], references: [id])
+  categoryRatings  Json
+  overallRating    Float
+  totalEvaluations Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([facultyId, academicYearId])
 }

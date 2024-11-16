@@ -65,7 +65,7 @@ export default function SelectSections({
     };
 
     fetchSections();
-  }, [yearLevelId, departmentId, field, onSectionChange]);
+  }, [yearLevelId, departmentId]);
 
   const handleChange = (sectionId: string) => {
     field.onChange(sectionId);

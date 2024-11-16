@@ -95,7 +95,7 @@ export default function ProfilePage() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
   const { data: studentInfo, isLoading, isError } = useQuery({
-    queryKey: ["students"],
+    queryKey: ["students", "profile"],
     queryFn: getStudent,
   });
 

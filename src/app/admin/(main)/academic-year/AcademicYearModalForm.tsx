@@ -129,9 +129,9 @@ export default function AcademicYearModalForm({ onOpen, onClose, transform, acad
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                <SelectItem value='1st'>1ST SEMESTER</SelectItem>
-                                                <SelectItem value='2nd'>2ND SEMESTER</SelectItem>
-                                                <SelectItem value='summer'>SUMMER</SelectItem>
+                                                <SelectItem value='1ST SEMESTER'>1ST SEMESTER</SelectItem>
+                                                <SelectItem value='2ND SEMESTER'>2ND SEMESTER</SelectItem>
+                                                <SelectItem value='SUMMBER'>SUMMER</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>

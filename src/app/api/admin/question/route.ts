@@ -65,12 +65,10 @@ export async function POST(req: NextRequest) {
         required,
         allowComments,
         ratingScale: {
-          create: ratingScale
-            ? Object.entries(ratingScale).map(([rating, description]) => ({
-                rating: Number(rating),
-                description,
-              }))
-            : [],
+          create: ratingScale.map(({ rating, description }) => ({
+            rating,
+            description,
+          })),
         },
       },
     });

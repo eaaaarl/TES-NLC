@@ -25,7 +25,7 @@ export default function ProfileStudent() {
   const router = useRouter();
 
   const { data: studentInfo, isLoading, isError } = useQuery({
-    queryKey: ["students"],
+    queryKey: ["students", "profile"],
     queryFn: getStudent,
   });
 

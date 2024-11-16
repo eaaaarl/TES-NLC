@@ -9,7 +9,7 @@ export function useSubmitAvatar() {
       await startAvatarUpload([avatar]);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["students", "profile"] });
     },
     onError: (error) => {
       console.log(error);

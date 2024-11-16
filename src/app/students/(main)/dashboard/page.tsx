@@ -11,21 +11,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   Calendar,
   ClipboardList,
@@ -33,13 +19,14 @@ import {
   History,
   Star,
   User,
-  Loader2,
   BookOpen
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SubjectSelectionDialog from "./_components/SelectionDialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
-// Mock Data for Selection Modal
 const MOCK_DATA = {
   currentAcademicYear: {
     id: "ay1",
@@ -47,34 +34,85 @@ const MOCK_DATA = {
     semester: "2nd Sem",
     isActive: true
   },
-  sections: [
-    { id: "sec1", sectionName: "BSIT-1A" },
-    { id: "sec2", sectionName: "BSIT-1B" },
-    { id: "sec3", sectionName: "BSIT-1C" },
-  ],
-  yearLevels: [
-    { id: "yl1", yearName: "First Year" },
-    { id: "yl2", yearName: "Second Year" },
-    { id: "yl3", yearName: "Third Year" },
-    { id: "yl4", yearName: "Fourth Year" },
-  ],
-  subjects: [
-    { id: "sub1", subjectName: "Mathematics 101", subject_code: "MATH101" },
-    { id: "sub2", subjectName: "Physics 201", subject_code: "PHYS201" },
-    { id: "sub3", subjectName: "Chemistry 101", subject_code: "CHEM101" },
-    { id: "sub4", subjectName: "Biology 201", subject_code: "BIO201" },
-  ],
 };
 
-const StudentDashboard = () => {
-  const [showModal, setShowModal] = useState(true); // Set to true to show on load
-  const [selectedSection, setSelectedSection] = useState("");
-  const [selectedYearLevel, setSelectedYearLevel] = useState("");
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [studentSelections, setStudentSelections] = useState(null);
+const MetricCardSkeleton = () => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-12 w-12 rounded-lg" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[100px]" />
+          <Skeleton className="h-6 w-[60px]" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
-  // Sample data for existing dashboard
+// Loading skeleton for tables
+const TableSkeleton = () => (
+  <Card>
+    <CardHeader>
+      <Skeleton className="h-6 w-[200px]" />
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex gap-4">
+            <Skeleton className="h-4 w-[150px]" />
+            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[100px]" />
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const StudentDashboard = () => {
+  const [showModal, setShowModal] = useState(true);
+  const router = useRouter()
+  const { data: studentData, isLoading: isLoadingStudent } = useQuery({
+    queryKey: ['students', 'profile'],
+    queryFn: async () => {
+      const response = await fetch('/api/student/auth/profile');
+      if (!response.ok) throw new Error('Failed to fetch student data');
+      return response.json();
+    }
+  });
+
+  const { data: selectionData, isLoading: isLoadingSelection } = useQuery({
+    queryKey: ['students', 'selection'],
+    queryFn: async () => {
+      const response = await fetch('/api/student/selection');
+      if (!response.ok) throw new Error('Failed to fetch selection data');
+      return response.json();
+    }
+  });
+  const academicYear = selectionData?.academicYear ?? null;
+
+  const Subjects = selectionData?.selectionData?.subjects ?? [];
+  const YearLevel = selectionData?.selectionData?.yearLevels ?? [];
+  const Section = selectionData?.selectionData?.sections ?? [];
+
+  const needSelection = selectionData?.student?.needsSelection ?? false;
+  const selectedSection = selectionData?.student?.currentSelections?.section ?? null;
+  const selectedYearLevel = selectionData?.student?.currentSelections?.section?.yearLevel ?? null;
+  const countSubject = selectionData?.student?.currentSelections?.subjects?.length ?? 0;
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (needSelection && !showModal) {
+      timer = setTimeout(() => setShowModal(true), 3000);
+    }
+    return () => timer && clearTimeout(timer);
+  }, [needSelection, showModal]);
+
+  useEffect(() => {
+    setShowModal(needSelection);
+  }, [needSelection]);
+
   const pendingEvaluations = [
     { teacher: "Dr. Santos", subject: "Mathematics 101", deadline: "Nov 20, 2024" },
     { teacher: "Prof. Garcia", subject: "Physics 201", deadline: "Nov 22, 2024" },
@@ -85,59 +123,72 @@ const StudentDashboard = () => {
     { teacher: "Prof. Cruz", subject: "Biology 201", date: "Oct 10, 2024" },
   ];
 
-  const handleSubmit = async () => {
-    if (!selectedSection || !selectedYearLevel || selectedSubjects.length === 0) {
-      return;
-    }
+  if (isLoadingStudent || isLoadingSelection) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-[250px]" />
+              <Skeleton className="h-4 w-[350px]" />
+            </div>
+            <Skeleton className="h-10 w-[120px]" />
+          </div>
 
-    setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <MetricCardSkeleton key={i} />
+            ))}
+          </div>
 
-    // Update selections
-    setStudentSelections({
-      section: MOCK_DATA.sections.find(s => s.id === selectedSection),
-      yearLevel: MOCK_DATA.yearLevels.find(y => y.id === selectedYearLevel),
-      subjects: MOCK_DATA.subjects.filter(s => selectedSubjects.includes(s.id))
-    });
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TableSkeleton />
+            <TableSkeleton />
+          </div>
 
-    setLoading(false);
-    setShowModal(false);
-  };
-
-  const toggleSubject = (subjectId) => {
-    setSelectedSubjects(prev =>
-      prev.includes(subjectId)
-        ? prev.filter(id => id !== subjectId)
-        : [...prev, subjectId]
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-[200px]" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-[50px]" />
+                </div>
+                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-4 w-[300px]" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Student Dashboard</h1>
-            <p className="text-gray-600">Welcome back, Juan Dela Cruz</p>
+            <p className="text-gray-600">Welcome back, {studentData?.firstname} {studentData?.middlename} {studentData?.lastname}</p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button onClick={() => router.push('/students/profile')} className="flex items-center gap-2">
             <User className="h-4 w-4" />
             View Profile
           </Button>
         </div>
 
-        {/* Show warning if selections are not made */}
-        {!studentSelections && (
+        {needSelection && (
           <Alert className="bg-yellow-50 border-yellow-200">
             <AlertDescription className="text-yellow-800">
-              Please select your section, year level, and subjects for the current semester.
+              PLEASE SELECT YOUR SECTION, YEAR LEVEL, AND SUBJECTS FOR THE CURRENT SEMESTER
+              TO PROCEED WITH FACULTY EVALUATION.
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
@@ -175,7 +226,7 @@ const StudentDashboard = () => {
                 </div>
                 <div>
                   <p className="text-gray-600">Current Semester</p>
-                  <p className="text-2xl font-bold">{MOCK_DATA.currentAcademicYear.semester}</p>
+                  <p className="text-2xl font-bold">{academicYear?.semester.toUpperCase()}</p>
                 </div>
               </div>
             </CardContent>
@@ -189,16 +240,14 @@ const StudentDashboard = () => {
                 </div>
                 <div>
                   <p className="text-gray-600">Selected Subjects</p>
-                  <p className="text-2xl font-bold">{studentSelections?.subjects.length || 0}</p>
+                  <p className="text-2xl font-bold">{countSubject}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pending Evaluations */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -234,7 +283,6 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Evaluation History */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -284,23 +332,22 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Selection Modal */}
         <SubjectSelectionDialog
           showModal={showModal}
           setShowModal={setShowModal}
-          MOCK_DATA={MOCK_DATA}
+          academicYear={academicYear}
+          Section={Section}
+          YearLevel={YearLevel}
           selectedSection={selectedSection}
-          setSelectedSection={setSelectedSection}
           selectedYearLevel={selectedYearLevel}
-          setSelectedYearLevel={setSelectedYearLevel}
-          selectedSubjects={selectedSubjects}
-          toggleSubject={toggleSubject}
-          loading={loading}
-          handleSubmit={handleSubmit}
+          Subjects={Subjects}
+          loading={isLoadingSelection}
         />
       </div>
     </div>
   );
 };
+
+
 
 export default StudentDashboard;
