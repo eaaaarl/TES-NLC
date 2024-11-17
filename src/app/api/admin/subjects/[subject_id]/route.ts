@@ -43,7 +43,8 @@ export async function PUT(
   try {
     const id = params.subject_id;
     const payload = await req.json();
-    const { subjectName, subject_code } = subjectSchema.parse(payload);
+    const { subjectName, subject_code, yearLevelId, departmentId } =
+      subjectSchema.parse(payload);
 
     if (!id) {
       return NextResponse.json(
@@ -78,6 +79,8 @@ export async function PUT(
       data: {
         subjectName,
         subject_code,
+        yearLevelId,
+        departmentId,
       },
     });
 

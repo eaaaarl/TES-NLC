@@ -18,7 +18,10 @@ import React, { useEffect } from 'react'
 import { Control, useForm } from "react-hook-form"
 import { useCreateSubject, useUpdateSubject } from "./mutation"
 import { Loader2 } from "lucide-react"
-import { Subject } from "@/lib/types"
+import { Department, Subject, YearLevel } from "@/lib/types"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useQuery } from "@tanstack/react-query"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface SubjectModalFormProps {
     subject?: Subject | null
@@ -31,7 +34,9 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
         resolver: zodResolver(subjectSchema),
         defaultValues: {
             subject_code: "",
-            subjectName: ""
+            subjectName: "",
+            yearLevelId: "",
+            departmentId: ""
         }
     })
 
@@ -41,7 +46,7 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
     const { mutate: updateSubject, status: statusUpdateSubject } = useUpdateSubject();
     const subject_id = subject?.id;
     const submitSubject = (payload: SubjectValues) => {
-        if (isUpdating) {
+        if (isUpdating && subject.id) {
             updateSubject({ subject_id: subject_id as string, values: payload })
         } else {
             createSubject(payload, {
@@ -57,7 +62,9 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
         if (subject) {
             form.reset({
                 subject_code: subject?.subject_code ?? "",
-                subjectName: subject?.subjectName
+                subjectName: subject?.subjectName ?? "",
+                yearLevelId: subject.yearLevelId,
+                departmentId: subject.departmentId
             })
         }
     }, [form, subject])
@@ -67,6 +74,25 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
         form.reset()
     }
 
+    const { data: yearLevel, isLoading: yearLevelLoading } = useQuery({
+        queryKey: ['subjects', 'yearlevel'],
+        queryFn: async (): Promise<YearLevel[]> => {
+            const response = await fetch(`/api/admin/yearlevel`)
+            if (!response.ok) throw new Error('Failed to fetch year level')
+            const data = await response.json();
+            return data;
+        }
+    })
+
+    const { data: department, isLoading: departmentLoading } = useQuery({
+        queryKey: ['subjects', 'department'],
+        queryFn: async (): Promise<Department[]> => {
+            const response = await fetch(`/api/admin/department`)
+            if (!response.ok) throw new Error('Failed to fetch department')
+            const data = await response.json();
+            return data;
+        }
+    })
     return (
         <AlertDialog open={open}>
             <AlertDialogContent>
@@ -78,17 +104,42 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
                 </AlertDialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submitSubject)}>
+
                         <InputField
                             control={form.control}
                             nameField="subject_code"
                             label="Subject Code"
                         />
+
                         <InputField
                             control={form.control}
                             nameField="subjectName"
                             label="Subject Name"
                         />
 
+                        {
+                            yearLevel && (
+                                <SelectYearField
+                                    control={form.control}
+                                    nameField="yearLevelId"
+                                    label="Year Level"
+                                    data={yearLevel}
+                                    isLoading={yearLevelLoading}
+                                />
+                            )
+                        }
+
+                        {
+                            department && (
+                                <SelectDepartmentField
+                                    control={form.control}
+                                    nameField="departmentId"
+                                    label="Department"
+                                    data={department}
+                                    isLoading={departmentLoading}
+                                />
+                            )
+                        }
                         <AlertDialogFooter className="mt-3">
                             <AlertDialogCancel onClick={handleClose}>Cancel</AlertDialogCancel>
                             <Button type="submit" disabled={statusCreateSubject === 'pending' || statusUpdateSubject === 'pending'}>
@@ -112,4 +163,118 @@ function InputField({ control, nameField, label, placeholder }: { control: Contr
             <FormMessage />
         </FormItem>
     )} />
+}
+
+function SelectYearField({
+    control,
+    nameField,
+    label,
+    data,
+    isLoading
+}:
+    {
+        control: Control<SubjectValues>,
+        nameField: keyof SubjectValues,
+        label: string,
+        data: YearLevel[],
+        isLoading: boolean
+    }) {
+    return <FormField
+        control={control}
+        name={nameField}
+        render={({ field }) => (
+            <FormItem>
+                <FormLabel>{label}</FormLabel>
+                <FormControl>
+                    <Select
+                        onValueChange={(value) => field.onChange(value)}
+                        value={field.value}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder={`Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                {isLoading ?
+                                    (
+                                        <>
+                                            <div className="p-2">
+                                                <Skeleton className="h-5 w-full" />
+                                            </div>
+                                            <div className="p-2">
+                                                <Skeleton className="h-5 w-full" />
+                                            </div>
+                                        </>
+                                    ) :
+                                    (data?.map((y) => (
+                                        <SelectItem key={y.id} value={y.id}>
+                                            {y.yearName}
+                                        </SelectItem>
+                                    )))
+                                }
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        )}
+    />
+}
+
+function SelectDepartmentField({
+    control,
+    nameField,
+    label,
+    data,
+    isLoading
+}:
+    {
+        control: Control<SubjectValues>,
+        nameField: keyof SubjectValues,
+        label: string,
+        data: Department[],
+        isLoading: boolean
+    }) {
+    return <FormField
+        control={control}
+        name={nameField}
+        render={({ field }) => (
+            <FormItem>
+                <FormLabel>{label}</FormLabel>
+                <FormControl>
+                    <Select
+                        onValueChange={(value) => field.onChange(value)}
+                        value={field.value}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder={`Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                {isLoading ?
+                                    (
+                                        <>
+                                            <div className="p-2">
+                                                <Skeleton className="h-5 w-full" />
+                                            </div>
+                                            <div className="p-2">
+                                                <Skeleton className="h-5 w-full" />
+                                            </div>
+                                        </>
+                                    ) :
+                                    (data?.map((d) => (
+                                        <SelectItem key={d.id} value={d.id}>
+                                            {d.departmentName}
+                                        </SelectItem>
+                                    )))
+                                }
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        )}
+    />
 }

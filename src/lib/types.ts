@@ -61,6 +61,8 @@ export interface Subject {
   id: string;
   subject_code?: string | null;
   subjectName: string;
+  yearLevelId: string;
+  departmentId: string;
 }
 
 export interface AcademicYear {

@@ -31,6 +31,8 @@ export type CourseValues = z.infer<typeof courseSchema>;
 export const subjectSchema = z.object({
   subject_code: z.string().min(2, "Must be at least 2 characters").optional(),
   subjectName: requiredString.min(4, "Must be at least 4 characters"),
+  yearLevelId: requiredString,
+  departmentId: requiredString,
 });
 
 export type SubjectValues = z.infer<typeof subjectSchema>;

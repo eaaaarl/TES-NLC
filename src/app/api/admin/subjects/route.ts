@@ -16,11 +16,14 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = await req.json();
-    const { subject_code, subjectName } = subjectSchema.parse(payload);
+    const { subject_code, subjectName, yearLevelId, departmentId } =
+      subjectSchema.parse(payload);
     const subject = await prisma.subject.create({
       data: {
         subjectName,
         subject_code,
+        yearLevelId,
+        departmentId,
       },
     });
     return NextResponse.json(subject);
