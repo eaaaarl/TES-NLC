@@ -66,7 +66,7 @@ export default function StudentTable() {
   }, [search]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["students", page, pageSize, debouncedSearch],
+    queryKey: ["students", "registration", page, pageSize, debouncedSearch],
     queryFn: () => fetchStudent(page, pageSize, debouncedSearch),
   });
 
@@ -185,12 +185,12 @@ export default function StudentTable() {
                   {student.firstname} {student.middlename} {student.lastname}
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                  {student.section.yearLevel.yearName.toUpperCase()}
+                  {student?.yearLevel?.yearName?.toUpperCase() || (<Badge>Not Assigned</Badge>)}
                 </TableCell>
                 <TableCell>
                   {student.course.department.departmentName}
                 </TableCell>
-                <TableCell>{student.section.sectionName}</TableCell>
+                <TableCell>{student.section?.sectionName?.toUpperCase() || (<Badge>Not Assigned</Badge>)}</TableCell>
                 <TableCell>
                   <Badge variant={"destructive"}>{student.status}</Badge>
                 </TableCell>
@@ -259,17 +259,17 @@ export default function StudentTable() {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">
                     {student.firstname.toUpperCase()}{" "}
-                    {student.middlename.toUpperCase()}{" "}
+                    {student.middlename?.toUpperCase()}{" "}
                     {student.lastname.toUpperCase()}
                   </h3>
-                  <div className="font-semibold">BSCS-3A</div>
+                  <div className="font-semibold">{student.section?.sectionName || 'Not Assigned'}</div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
                   <div className="mb-2 flex-row">
                     <div className="text-sm">Year Level</div>
-                    <div>{student.yearLevelId.toUpperCase()}</div>
+                    <div>{student.yearLevel?.yearName || "Not Assigned"}</div>
                   </div>
                   <div className="mb-2 flex-row">
                     <div className="text-sm ">Department</div>
@@ -318,7 +318,11 @@ export default function StudentTable() {
         </div>
       </div>
 
-      <ConfirmDeleteDialog itemName={studentToDelete?.studentID} onConfirm={handleDelete} onCancel={() => setOnOpenDelete(false)} isOpen={onOpenDelete} />
+      <ConfirmDeleteDialog
+        itemName={studentToDelete?.studentID}
+        onConfirm={handleDelete}
+        onCancel={() => setOnOpenDelete(false)}
+        isOpen={onOpenDelete} />
     </>
   );
 }

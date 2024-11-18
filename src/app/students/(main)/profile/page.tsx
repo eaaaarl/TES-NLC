@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import Resizer from "react-image-file-resizer";
 import ProfileSkeleton from "./ProfileSectionSkeleton";
+import { Badge } from "@/components/ui/badge";
 
 const CropImageDialog = lazy(() => import('@/components/CropImageDialog'));
 
@@ -290,14 +291,14 @@ export default function ProfilePage() {
             <div>
               <ProfileField
                 label="Year Level"
-                value={studentInfo?.section.yearLevel.yearName.toUpperCase()}
+                value={studentInfo?.yearLevel?.yearName?.toUpperCase() || (<Badge>Not Assigned</Badge>)}
                 isLoading={isLoading}
               />
             </div>
             <div>
               <ProfileField
                 label="Section"
-                value={studentInfo?.section.sectionName.toUpperCase()}
+                value={studentInfo?.section?.sectionName?.toUpperCase() || (<Badge>Not Assigned</Badge>)}
                 isLoading={isLoading}
               />
             </div>

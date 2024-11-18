@@ -61,7 +61,8 @@ export async function deleteAcademicYear(id: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to delete the academic year");
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to delete academic year");
   }
 
   return response.json();

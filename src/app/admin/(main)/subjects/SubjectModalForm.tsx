@@ -44,10 +44,11 @@ export default function SubjectModalForm({ subject, open, onClose }: SubjectModa
 
     const { mutate: createSubject, status: statusCreateSubject } = useCreateSubject();
     const { mutate: updateSubject, status: statusUpdateSubject } = useUpdateSubject();
+
     const subject_id = subject?.id;
     const submitSubject = (payload: SubjectValues) => {
         if (isUpdating && subject.id) {
-            updateSubject({ subject_id: subject_id as string, values: payload })
+            updateSubject({ subject_id: subject_id as string, payload })
         } else {
             createSubject(payload, {
                 onSuccess: () => {

@@ -59,8 +59,8 @@ export function useCreateSubject() {
 
   return useMutation({
     mutationFn: createSubject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subjects"] });
+    onSuccess: (newSubject) => {
+      const {} = newSubject.meta || {};
       toast({
         description: "Subject created.",
       });

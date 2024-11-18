@@ -205,6 +205,73 @@ async function main() {
     ],
   });
 
+  await prisma.section.createMany({
+    data: [
+      {
+        sectionName: "BSCS-4A",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["4TH YEAR"],
+      },
+      {
+        sectionName: "BSCS-4B",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["4TH YEAR"],
+      },
+      {
+        sectionName: "BSCS-3A",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["3RD YEAR"],
+      },
+      {
+        sectionName: "BSCS-3B",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["3RD YEAR"],
+      },
+
+      {
+        sectionName: "BSCS-2A",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["2ND YEAR"],
+      },
+      {
+        sectionName: "BSCS-2B",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["2ND YEAR"],
+      },
+      {
+        sectionName: "BSCS-2C",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["2ND YEAR"],
+      },
+      {
+        sectionName: "BSCS-2D",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["2ND YEAR"],
+      },
+
+      {
+        sectionName: "BSCS-1A",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["1ST YEAR"],
+      },
+      {
+        sectionName: "BSCS-1B",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["1ST YEAR"],
+      },
+      {
+        sectionName: "BSCS-1C",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["1ST YEAR"],
+      },
+      {
+        sectionName: "BSCS-1D",
+        departmentId: departmentMap["CITE"],
+        yearLevelId: yearLevelMap["1ST YEAR"],
+      },
+    ],
+  });
+
   console.log({ newUser, newAdministrator });
 }
 

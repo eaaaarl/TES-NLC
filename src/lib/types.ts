@@ -3,7 +3,7 @@ export interface Students {
   avatarUrl?: string;
   studentID: string;
   firstname: string;
-  middlename: string;
+  middlename: string | null;
   lastname: string;
   courseID: string;
   departmentId: string;
@@ -13,14 +13,12 @@ export interface Students {
       departmentName: string;
     };
   };
-  yearLevelId: string;
+  yearLevel: {
+    yearName: string | null;
+  };
   section: {
     id: string;
-    sectionName: string;
-    yearLevel: {
-      id: string;
-      yearName: string;
-    };
+    sectionName: string | null;
   };
   status: string;
   createdAt: string;

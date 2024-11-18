@@ -15,7 +15,7 @@ export function useSubmitSelection() {
       console.error(error);
       toast({
         variant: "destructive",
-        description: "Failed to submit selection",
+        description: "Failed to submit selection, Please try again.",
       });
     },
   });

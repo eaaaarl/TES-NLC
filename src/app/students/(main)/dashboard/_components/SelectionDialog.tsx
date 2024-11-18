@@ -110,40 +110,13 @@ const SubjectSelectionDialog = ({
                 <DialogHeader className="pb-4">
                     <DialogTitle>Select Your Details</DialogTitle>
                     <DialogDescription>
-                        Please select your section, year level, and subjects for {academicYear?.year} - {academicYear?.semester}
+                        Please select your section, year level, and subjects for {academicYear?.year || 'NO'} - {academicYear?.semester || 'ACTIVE SEM'}
                     </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submitSelection)} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="sectionId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Section</FormLabel>
-                                        <FormControl>
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select section" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        {Section?.map((section) => (
-                                                            <SelectItem key={section.id} value={section.id}>
-                                                                {section.sectionName}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
                             <FormField
                                 control={form.control}
                                 name="yearLevelId"
@@ -160,6 +133,32 @@ const SubjectSelectionDialog = ({
                                                         {YearLevel?.map((y) => (
                                                             <SelectItem key={y.id} value={y.id}>
                                                                 {y.yearName.toUpperCase()}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="sectionId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Section</FormLabel>
+                                        <FormControl>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select section" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        {Section?.map((section) => (
+                                                            <SelectItem key={section.id} value={section.id}>
+                                                                {section.sectionName}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectGroup>

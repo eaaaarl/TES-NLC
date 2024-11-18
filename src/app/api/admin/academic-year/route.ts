@@ -76,37 +76,68 @@ export async function POST(req: NextRequest) {
   try {
     const { user } = await validateRequest();
     if (!user) {
-      return NextResponse.json(
-        {
-          error: "Unathorized!",
-        },
-        {
-          status: 403,
-        }
-      );
+      return NextResponse.json({ error: "Unauthorized!" }, { status: 403 });
     }
 
     const payload = await req.json();
     const { year, semester } = AcademicYearSchema.parse(payload);
 
-    const newAcademicYear = await prisma.academicYear.create({
-      data: {
-        year,
-        semester,
-        isActive: true,
-      },
+    const existingYear = await prisma.academicYear.findFirst({
+      where: { year, semester },
     });
 
-    return NextResponse.json(newAcademicYear);
+    if (existingYear) {
+      return NextResponse.json(
+        { error: "Academic year already exists" },
+        { status: 400 }
+      );
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.academicYear.updateMany({
+        where: { isActive: true },
+        data: { isActive: false },
+      });
+
+      const newAcademicYear = await tx.academicYear.create({
+        data: {
+          year,
+          semester,
+          isActive: true,
+          status: "ACTIVE",
+        },
+      });
+
+      return newAcademicYear;
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.student.updateMany({
+        where: {},
+        data: {
+          status: "PENDING",
+          sectionId: null,
+          yearLevelId: null,
+        },
+      });
+
+      await Promise.all([
+        tx.studentSubjectAssign.deleteMany({}),
+        tx.evaluation.deleteMany({
+          where: { status: "PENDING" },
+        }),
+      ]);
+    });
+
+    return NextResponse.json({
+      message: "Academic year created and system reset successfully.",
+      data: result,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      {
-        error: "Internal Server Error",
-      },
-      {
-        status: 500,
-      }
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
   }
 }

@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const academicYear = await prisma.academicYear.findFirst({
+      where: {
+        isActive: true,
+      },
+    });
+
     if (!student) {
       return NextResponse.json(
         {
@@ -57,6 +63,7 @@ export async function POST(req: NextRequest) {
         data: subjectIds.map((s) => ({
           studentId: student.id,
           subjectId: s.id,
+          academicYearId: academicYear?.id as string,
         })),
       });
     });

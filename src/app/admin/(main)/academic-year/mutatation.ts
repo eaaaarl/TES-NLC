@@ -63,10 +63,11 @@ export function useDeleteAcademicYear() {
       queryClient.invalidateQueries({ queryKey: ["academic-year"] });
     },
     onError: (error) => {
-      console.error(error);
+      console.log(error);
       toast({
         variant: "destructive",
-        description: "Failed to create academic year",
+        description:
+          error.message || "Failed to delete academic year. Please try again.",
       });
     },
   });

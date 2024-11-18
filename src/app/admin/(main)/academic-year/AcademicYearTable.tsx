@@ -26,7 +26,6 @@ export default function AcademicYearTable() {
     const [academicYearToDelete, setAcademicYearToDelete] = useState<AcademicYear | null>(null);
     const [onOpen, setOnOpen] = useState<boolean>(false);
     const [selectedAcademicYear, setSelectedAcademicYear] = useState<AcademicYear | null>(null);
-
     const { data, isLoading } = useQuery({
         queryKey: ['academic-year', page, pageSize, debouncedSearch],
         queryFn: () => fetchAcademicYear(page, pageSize, debouncedSearch)
@@ -84,7 +83,7 @@ export default function AcademicYearTable() {
                         data?.data.map((academicyear) => (
                             <TableRow key={academicyear.id}>
                                 <TableCell>{academicyear.year}</TableCell>
-                                <TableCell>{academicyear.semester === '1st' ? ('1ST SEMESTER') : academicyear.semester === '2nd' ? ('2ND SEMESTER') : 'SUMMER'}</TableCell>
+                                <TableCell>{academicyear.semester}</TableCell>
                                 <TableCell>{academicyear.isActive === true ? (<Badge className='bg-green-500'>Active</Badge>) : (<Badge variant={'destructive'}>Inactive</Badge>)}</TableCell>
                                 <TableCell>
                                     <DropdownMenu>

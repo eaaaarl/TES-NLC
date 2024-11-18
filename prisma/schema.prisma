@@ -85,11 +85,11 @@ model Student {
   courseID String
   course   Course @relation(fields: [courseID], references: [id])
 
-  sectionId String
-  section   Section @relation(fields: [sectionId], references: [id])
+  sectionId String?
+  section   Section? @relation(fields: [sectionId], references: [id])
 
-  yearLevelId String
-  yearLevel   YearLevel @relation(fields: [yearLevelId], references: [id])
+  yearLevelId String?
+  yearLevel   YearLevel? @relation(fields: [yearLevelId], references: [id])
 
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id])
@@ -158,12 +158,14 @@ model YearLevel {
 }
 
 model AcademicYear {
-  id                   String                 @id @default(uuid())
-  semester             String
-  year                 String
-  isActive             Boolean                @default(false)
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt()
+  id        String   @id @default(uuid())
+  semester  String
+  year      String
+  isActive  Boolean  @default(false)
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
   FacultySubjectAssign FacultySubjectAssign[]
   Evaluation           Evaluation[]
   FacultyEvaluation    FacultyEvaluation[]
@@ -216,6 +218,7 @@ model StudentSubjectAssign {
   subject        Subject      @relation(fields: [subjectId], references: [id])
   academicYearId String
   academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  status         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -232,7 +235,7 @@ model Evaluation {
   facultyId String
   faculty   Faculty  @relation(fields: [facultyId], references: [id])
   responses Json
-  status    String   @default("pending") // pending, completed
+  status    String   @default("pending")
   deadline  DateTime
 
   academicYearId String

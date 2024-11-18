@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -19,23 +19,17 @@ import {
   History,
   Star,
   User,
-  BookOpen
+  BookOpen,
+  Plus,
+  LucideIcon
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SubjectSelectionDialog from "./_components/SelectionDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-
-const MOCK_DATA = {
-  currentAcademicYear: {
-    id: "ay1",
-    year: "2024-2025",
-    semester: "2nd Sem",
-    isActive: true
-  },
-};
-
+import { Badge } from "@/components/ui/badge";
+import MetricCard from "./_components/MetricCard";
 const MetricCardSkeleton = () => (
   <Card>
     <CardContent className="p-6">
@@ -103,15 +97,24 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (needSelection && !showModal) {
-      timer = setTimeout(() => setShowModal(true), 3000);
+
+    if (!academicYear) {
+      setShowModal(false);
+    } else {
+      if (needSelection && !showModal) {
+        timer = setTimeout(() => setShowModal(true), 3000);
+      }
+      return () => timer && clearTimeout(timer);
     }
-    return () => timer && clearTimeout(timer);
   }, [needSelection, showModal]);
 
   useEffect(() => {
-    setShowModal(needSelection);
-  }, [needSelection]);
+    if (!academicYear) {
+      setShowModal(false);
+    } else {
+      setShowModal(needSelection);
+    }
+  }, [needSelection, academicYear]);
 
   const pendingEvaluations = [
     { teacher: "Dr. Santos", subject: "Mathematics 101", deadline: "Nov 20, 2024" },
@@ -169,91 +172,86 @@ const StudentDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between bg-white p-6 rounded-lg shadow-md">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Student Dashboard</h1>
             <p className="text-gray-600">Welcome back, {studentData?.firstname} {studentData?.middlename} {studentData?.lastname}</p>
           </div>
-          <Button onClick={() => router.push('/students/profile')} className="flex items-center gap-2">
+          <Button
+            onClick={() => router.push('/students/profile')}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
             <User className="h-4 w-4" />
             View Profile
           </Button>
         </div>
 
-        {needSelection && (
+        {!academicYear && (
           <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertDescription className="text-yellow-800">
-              PLEASE SELECT YOUR SECTION, YEAR LEVEL, AND SUBJECTS FOR THE CURRENT SEMESTER
-              TO PROCEED WITH FACULTY EVALUATION.
+            <AlertDescription className="text-yellow-800 font-medium">
+              <strong>No Active Semester</strong>. Currently, there is no active semester set by the administrator or HR.
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <ClipboardList className="h-6 w-6 text-blue-700" />
-                </div>
-                <div>
-                  <p className="text-gray-600">Pending Evaluations</p>
-                  <p className="text-2xl font-bold">2</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            icon={ClipboardList}
+            label="Pending Evaluations"
+            value="2"
+            color="blue"
+            badge="2 Pending"
+          />
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Star className="h-6 w-6 text-green-700" />
-                </div>
-                <div>
-                  <p className="text-gray-600">Completed Evaluations</p>
-                  <p className="text-2xl font-bold">8</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard
+            icon={Star}
+            label="Completed Evaluations"
+            value="8"
+            color="green"
+            badge="8 Completed"
+          />
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <GraduationCap className="h-6 w-6 text-purple-700" />
-                </div>
-                <div>
-                  <p className="text-gray-600">Current Semester</p>
-                  <p className="text-2xl font-bold">{academicYear?.semester.toUpperCase()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard
+            icon={GraduationCap}
+            label="Current Semester"
+            value={academicYear?.semester.toUpperCase() || <Badge variant={'secondary'} className="bg-purple-50 text-purple-700 hover:border-purple-100">No Active Sem</Badge>}
+            badge={academicYear?.semester.toUpperCase() || <Badge variant={'secondary'} className="bg-purple-50 text-purple-700 hover:border-purple-100">No Active Sem</Badge>}
+            color="purple"
+          />
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-orange-100 rounded-lg">
-                  <BookOpen className="h-6 w-6 text-orange-700" />
-                </div>
-                <div>
-                  <p className="text-gray-600">Selected Subjects</p>
-                  <p className="text-2xl font-bold">{countSubject}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard
+            icon={BookOpen}
+            label="Selected Subjects"
+            value={countSubject}
+            color="orange"
+            badge={`${countSubject} Total Subjects`}
+            action={{
+              icon: Plus,
+              label: countSubject > 0 ? "Manage" : "Add"
+            }}
+            disabled={!academicYear}
+            tooltipText={!academicYear
+              ? "No active semester"
+              : countSubject > 0
+                ? "Manage your subjects"
+                : "Add new subjects"
+            }
+            onClick={() => setShowModal(true)}
+          />
         </div>
 
+        {/* Tables Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-medium">
                 <Calendar className="h-5 w-5 text-blue-600" />
                 Pending Evaluations
               </CardTitle>
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                {pendingEvaluations.length} pending
+              </Badge>
             </CardHeader>
             <CardContent>
               <Table>
@@ -262,16 +260,16 @@ const StudentDashboard = () => {
                     <TableHead>Teacher</TableHead>
                     <TableHead>Subject</TableHead>
                     <TableHead>Deadline</TableHead>
-                    <TableHead>Action</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingEvaluations.map((evaluation, index) => (
                     <TableRow key={index}>
-                      <TableCell>{evaluation.teacher}</TableCell>
+                      <TableCell className="font-medium">{evaluation.teacher}</TableCell>
                       <TableCell>{evaluation.subject}</TableCell>
                       <TableCell>{evaluation.deadline}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <Button size="sm" variant="outline">
                           Evaluate
                         </Button>
@@ -283,12 +281,15 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-medium">
                 <History className="h-5 w-5 text-green-600" />
                 Recent Evaluations
               </CardTitle>
+              <Badge variant="secondary" className="bg-green-50 text-green-700">
+                {completedEvaluations.length} completed
+              </Badge>
             </CardHeader>
             <CardContent>
               <Table>
@@ -302,7 +303,7 @@ const StudentDashboard = () => {
                 <TableBody>
                   {completedEvaluations.map((evaluation, index) => (
                     <TableRow key={index}>
-                      <TableCell>{evaluation.teacher}</TableCell>
+                      <TableCell className="font-medium">{evaluation.teacher}</TableCell>
                       <TableCell>{evaluation.subject}</TableCell>
                       <TableCell>{evaluation.date}</TableCell>
                     </TableRow>
@@ -314,9 +315,12 @@ const StudentDashboard = () => {
         </div>
 
         {/* Progress Section */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Evaluation Progress</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-purple-600" />
+              Evaluation Progress
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -331,7 +335,6 @@ const StudentDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
         <SubjectSelectionDialog
           showModal={showModal}
           setShowModal={setShowModal}

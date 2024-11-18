@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
             yearLevel: true,
           },
         },
+        yearLevel: true,
       },
       skip: offset,
       take: pageSize,
