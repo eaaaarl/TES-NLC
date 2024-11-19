@@ -21,7 +21,6 @@ import {
   User,
   BookOpen,
   Plus,
-  LucideIcon
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SubjectSelectionDialog from "./_components/SelectionDialog";
@@ -75,7 +74,6 @@ const StudentDashboard = () => {
       return response.json();
     }
   });
-
   const { data: selectionData, isLoading: isLoadingSelection } = useQuery({
     queryKey: ['students', 'selection'],
     queryFn: async () => {
@@ -84,11 +82,12 @@ const StudentDashboard = () => {
       return response.json();
     }
   });
+
+
   const academicYear = selectionData?.academicYear ?? null;
 
   const Subjects = selectionData?.selectionData?.subjects ?? [];
   const YearLevel = selectionData?.selectionData?.yearLevels ?? [];
-  const Section = selectionData?.selectionData?.sections ?? [];
 
   const needSelection = selectionData?.student?.needsSelection ?? false;
   const selectedSection = selectionData?.student?.currentSelections?.section ?? null;
@@ -125,6 +124,7 @@ const StudentDashboard = () => {
     { teacher: "Dr. Reyes", subject: "Chemistry 101", date: "Oct 15, 2024" },
     { teacher: "Prof. Cruz", subject: "Biology 201", date: "Oct 10, 2024" },
   ];
+
 
   if (isLoadingStudent || isLoadingSelection) {
     return (
@@ -335,17 +335,18 @@ const StudentDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
         <SubjectSelectionDialog
           showModal={showModal}
           setShowModal={setShowModal}
           academicYear={academicYear}
-          Section={Section}
           YearLevel={YearLevel}
           selectedSection={selectedSection}
           selectedYearLevel={selectedYearLevel}
           Subjects={Subjects}
           loading={isLoadingSelection}
         />
+
       </div>
     </div>
   );

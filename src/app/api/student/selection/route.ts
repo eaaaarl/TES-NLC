@@ -10,7 +10,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Get student data with their current selections
     const student = await prisma.student.findUnique({
       where: {
         userId: user.id,
@@ -53,13 +52,6 @@ export async function GET(req: NextRequest) {
 
     if (needsSelection) {
       selectionData = await prisma.$transaction(async (tx) => {
-        const departments = await tx.department.findMany({
-          select: {
-            id: true,
-            departmentName: true,
-          },
-        });
-
         const yearLevels = await tx.yearLevel.findMany({
           select: {
             id: true,
@@ -84,20 +76,10 @@ export async function GET(req: NextRequest) {
           },
         });
 
-        const courses = await tx.course.findMany({
-          select: {
-            id: true,
-            courseName: true,
-            departmentId: true,
-          },
-        });
-
         return {
-          departments,
           yearLevels,
           sections,
           subjects,
-          courses,
         };
       });
     }

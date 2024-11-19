@@ -18,13 +18,15 @@ import { StudentAssignSectionYearLevelSubject, studentAssignSectionYearLevelSubj
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useSubmitSelection } from '../mutation';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SubjectSelectionDialogProps {
     showModal: boolean;
     setShowModal: (show: boolean) => void;
     academicYear: AcademicYear | null;
     Subjects: Subject[];
-    Section: Sections[];
     YearLevel: YearLevel[];
     selectedYearLevel: YearLevel | null;
     selectedSection: Sections | null;
@@ -35,7 +37,6 @@ const SubjectSelectionDialog = ({
     showModal,
     setShowModal,
     academicYear,
-    Section,
     YearLevel,
     Subjects,
     loading = false,
@@ -43,6 +44,7 @@ const SubjectSelectionDialog = ({
     selectedSection,
 }: SubjectSelectionDialogProps) => {
     const { toast } = useToast()
+    const [currentSelection, setCurrentSelection] = useState<string>("");
     const form = useForm({
         resolver: zodResolver(StudentAssignSectionYearLevelSubject),
         defaultValues: {
@@ -54,6 +56,39 @@ const SubjectSelectionDialog = ({
 
     const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
 
+    const [yearLevelChange, setYearLevelChange] = useState<string | null>(selectedYearLevel?.id ?? null);
+    const [selectedYearLevelState, setSelectedYearLevelState] = useState<YearLevel | null>(selectedYearLevel);
+    const [selectedSectionState, setSelectedSectionState] = useState<Sections | null>(selectedSection);
+
+
+    const { data: sectionByYearLevel, isLoading: isLoadingSections } = useQuery({
+        queryKey: ['students', 'selection-section', yearLevelChange],
+        queryFn: async (): Promise<{ data: Sections[] }> => {
+            if (!yearLevelChange) return { data: [] }
+            const response = await fetch(`/api/student/selection/getSectionByYearLevel?yearLevelId=${yearLevelChange}`);
+            if (!response.ok) throw new Error('Failed to get the section by yearLevelId')
+            return response.json();
+        },
+        enabled: !!yearLevelChange
+    })
+
+    const handleYearLevelChange = (value: string) => {
+        const selectedLevel = YearLevel.find(y => y.id === value);
+        setSelectedYearLevelState(selectedLevel || null);
+
+        form.setValue('yearLevelId', value);
+        form.setValue('sectionId', '')
+        setSelectedSectionState(null);
+        setYearLevelChange(value);
+    };
+
+    const handleSectionChange = (value: string) => {
+        const selectedSec = sectionByYearLevel?.data.find((s) => s.id === value)
+        setSelectedSectionState(selectedSec || null)
+
+        form.setValue('sectionId', value)
+    }
+
     const handleSubjectSelect = (subjectId: string) => {
         const subject = Subjects.find(s => s.id === subjectId);
         if (subject) {
@@ -61,22 +96,37 @@ const SubjectSelectionDialog = ({
                 setSelectedSubjects(prev => prev.filter(s => s.id !== subjectId));
             } else {
                 setSelectedSubjects(prev => [...prev, subject]);
+                setCurrentSelection(subjectId);
             }
         }
     };
 
     const removeSubject = (subjectId: string) => {
         setSelectedSubjects(prev => prev.filter(s => s.id !== subjectId));
+        setCurrentSelection("");
     };
 
     const resetForm = () => {
+        setSelectedYearLevelState(selectedYearLevel);
+        setSelectedSectionState(selectedSection);
+        setYearLevelChange(selectedYearLevel?.id ?? null);
+        setSelectedSubjects([]);
+        setCurrentSelection("");
+
         form.reset({
             yearLevelId: selectedYearLevel?.id ?? "",
             sectionId: selectedSection?.id ?? "",
             subjectIds: []
         });
-        setSelectedSubjects([]);
     };
+
+    const getCurrentSelectionDisplay = () => {
+        const currentSubject = Subjects.find(s => s.id === currentSelection)
+        if (currentSubject) {
+            return `${currentSubject.subjectName} (${currentSubject.subject_code})`
+        }
+        return "Select Subjects"
+    }
 
     useEffect(() => {
         const subjectIds = selectedSubjects.map(subject => ({ id: subject.id }));
@@ -93,15 +143,16 @@ const SubjectSelectionDialog = ({
     const { mutate, status } = useSubmitSelection();
 
     const submitSelection = (payload: studentAssignSectionYearLevelSubjectValues) => {
-        mutate(payload, {
-            onSuccess: () => {
-                toast({
-                    description: 'Selections updated successfully!'
-                })
-                setShowModal(false)
-                resetForm();
-            }
-        })
+        console.log(payload)
+        /*   mutate(payload, {
+              onSuccess: () => {
+                  toast({
+                      description: 'Selections updated successfully!'
+                  })
+                  setShowModal(false)
+                  resetForm();
+              }
+          }) */
     }
 
     return (
@@ -116,6 +167,10 @@ const SubjectSelectionDialog = ({
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submitSelection)} className="space-y-6">
+                        <div className='grid grid-cols-1'>
+                            <p className='mb-3'>College of Information Technology Education</p>
+                            <hr />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -124,9 +179,16 @@ const SubjectSelectionDialog = ({
                                     <FormItem>
                                         <FormLabel>Year Level</FormLabel>
                                         <FormControl>
-                                            <Select onValueChange={field.onChange} value={field.value}>
+                                            <Select
+                                                onValueChange={handleYearLevelChange}
+                                                value={field.value || selectedYearLevel?.id}>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select year level" />
+                                                    <SelectValue placeholder="Select year level">
+                                                        {selectedYearLevelState ?
+                                                            selectedYearLevelState.yearName.toUpperCase() :
+                                                            "Select year level"
+                                                        }
+                                                    </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -150,17 +212,40 @@ const SubjectSelectionDialog = ({
                                     <FormItem>
                                         <FormLabel>Section</FormLabel>
                                         <FormControl>
-                                            <Select onValueChange={field.onChange} value={field.value}>
+                                            <Select
+                                                disabled={!yearLevelChange}
+                                                onValueChange={handleSectionChange}
+                                                value={field.value || selectedSection?.id}
+                                            >
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select section" />
+                                                    <SelectValue placeholder="Select Section"
+                                                    >
+                                                        {selectedSectionState && field.value ?
+                                                            selectedSectionState?.sectionName :
+                                                            (selectedSectionState ? "Select section" : "Select year level first")
+                                                        }
+                                                    </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        {Section?.map((section) => (
-                                                            <SelectItem key={section.id} value={section.id}>
-                                                                {section.sectionName}
-                                                            </SelectItem>
-                                                        ))}
+                                                        {isLoadingSections ? (
+                                                            <>
+                                                                <div className="p-2">
+                                                                    <Skeleton className="h-5 w-full" />
+                                                                </div>
+                                                                <div className="p-2">
+                                                                    <Skeleton className="h-5 w-full" />
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <SelectGroup>
+                                                                {sectionByYearLevel?.data?.map((s) => (
+                                                                    <SelectItem key={s.id} value={s.id}>
+                                                                        {s.sectionName}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectGroup>
+                                                        )}
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -178,34 +263,15 @@ const SubjectSelectionDialog = ({
                                 <FormItem>
                                     <FormLabel>Subjects</FormLabel>
                                     <div className="space-y-4">
-                                        {selectedSubjects.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50 min-h-[60px]">
-                                                {selectedSubjects.map((subject) => (
-                                                    <Badge
-                                                        key={subject.id}
-                                                        variant="outline"
-                                                        className="flex items-center gap-1 pl-3 pr-1 py-1"
-                                                    >
-                                                        <span>
-                                                            {subject.subjectName} ({subject.subject_code})
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeSubject(subject.id)}
-                                                            className="ml-1 hover:bg-secondary/80 rounded-full p-1"
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </button>
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
                                         <FormControl>
                                             <Select
+                                                value={currentSelection}
                                                 onValueChange={handleSubjectSelect}
                                             >
                                                 <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select subjects" />
+                                                    <SelectValue placeholder='Select Subjects'>
+                                                        {getCurrentSelectionDisplay()}
+                                                    </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent className="max-h-[300px]">
                                                     <SelectGroup>
@@ -227,7 +293,7 @@ const SubjectSelectionDialog = ({
                                                                             </span>
                                                                         </div>
                                                                         {isSelected && (
-                                                                            <Badge variant="secondary" className="ml-auto">
+                                                                            <Badge variant="default" className="ml-auto">
                                                                                 <Check className="h-3 w-3 mr-1" />
                                                                                 Selected
                                                                             </Badge>
@@ -240,6 +306,32 @@ const SubjectSelectionDialog = ({
                                                 </SelectContent>
                                             </Select>
                                         </FormControl>
+                                        {selectedSubjects.length > 0 && (
+                                            <ScrollArea className='h-[200px]'>
+                                                <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50">
+                                                    {selectedSubjects.map((subject) => (
+                                                        <Badge
+                                                            key={subject.id}
+                                                            variant="default"
+                                                            className="flex items-center gap-1 pl-3 pr-1 py-1"
+                                                        >
+                                                            <span>
+                                                                {subject.subjectName} ({subject.subject_code})
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    removeSubject(subject.id)
+                                                                }
+                                                                className="ml-1 hover:bg-secondary/80 rounded-full p-1"
+                                                            >
+                                                                <X className="h-3 w-3" />
+                                                            </button>
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </ScrollArea>
+                                        )}
                                     </div>
                                     <FormMessage />
                                 </FormItem>
@@ -249,7 +341,10 @@ const SubjectSelectionDialog = ({
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => setShowModal(false)}
+                                onClick={() => {
+                                    setShowModal(false)
+                                    resetForm?.()
+                                }}
                                 disabled={loading}
                             >
                                 Cancel

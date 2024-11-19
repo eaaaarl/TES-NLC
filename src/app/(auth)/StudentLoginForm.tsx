@@ -78,7 +78,7 @@ export default function StudentLoginForm() {
             Forgot Password?
           </a>
         </div>
-        <Button type="submit" className="w-full bg-blue-900 hover:bg-blue-800">
+        <Button type="submit" disabled={pending} className="w-full bg-blue-900 hover:bg-blue-800">
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
         </Button>
         <div className="mt-4 text-center text-sm">
